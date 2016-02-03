@@ -1,0 +1,64 @@
+<script>
+/*globals google */
+
+var audit = {
+
+    submit: function () {
+        var data = $(this).closest('form').serializeArray();
+        google.script.run
+            .withSuccessHandler(google.script.host.close)
+            .withFailureHandler(this.showError)
+            .prepareIncomingAccounts(data);
+    },
+
+    close: function () {
+        google.script.host.close();
+    },
+
+    showError: function (error) {
+        console.log(error);
+        window.alert('An error has occured, please try again.');
+    },
+
+    loadAccounts: function () {
+        $('.sidebar').hide();
+        $('.loading').addClass('spinner');
+    
+        google.script.run
+            .withSuccessHandler(this.showAccounts)
+            .withFailureHandler(this.showError)
+            .getAccountSummaries(); // located in server.gs
+    },
+
+    showAccounts: function (accounts) {
+        var select = $('#accounts');
+        select.empty();
+        accounts.forEach(function (account) {
+            var option = $('<option>')
+                .attr('value', account.id)
+                .text(account.name);
+            select.append(option);
+        });
+        $('.loading').removeClass('spinner');        
+        $('.sidebar').show();
+
+    }
+};
+
+$(function () {
+
+    // load Google Analytics accounts
+    audit.loadAccounts();
+
+    // initialize multi-selects
+    $('select[multiple]').select2();
+
+    // form - submit
+    $('#submit').on('click', audit.submit);
+
+    // form - close
+    $('#close').on('click', audit.close);
+
+
+});
+</script>
