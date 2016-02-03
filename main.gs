@@ -595,9 +595,3 @@ function prepareIncomingAccounts(selectedAccounts) {
 
     return doAuditOfAccounts(accountsObj);
 }
-
-/* to do
-* - loading icon/feature
-* - slideup for when shit is happening
-*
-*/
