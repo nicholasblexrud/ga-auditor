@@ -39,144 +39,261 @@ var Sheet = function (name, data) {
 Sheet.prototype = {
 
     getHeaderRow: function () {
-        var arr;
+        var colors = {
+            blue: '#4d90fe',
+            green: '#0fc357',
+            purple: '#c27ba0',
+            yellow: '#e7fe2b'
+        };
+
+        var cells;
 
         switch (this.name) {
 
         case 'Filters - View Level':
 
-            arr = [
-                'Account Name',
-                'Account Id',
-                'Property Name',
-                'Property Id',
-                'View Name',
-                'View Id',
-                'Filter Name',
-                'Filter Id'
-            ];
+            cells = [{
+                name: 'Account Name'
+            }, {
+                name: 'Account Id'
+            }, {
+                name: 'Property Name'
+            }, {
+                name: 'Property Id'
+            }, {
+                name: 'View Name'
+            }, {
+                name: 'View Id'
+            }, {
+                name: 'Filter Name'
+            }, {
+                name: 'Filter Id'
+            }];
 
             break;
 
         case 'Views':
 
-            arr = [
-                'Account Name',
-                'Account Id',
-                'Property Name',
-                'Property Id',
-                'View Name',
-                'View Id',
-                'View Website URL',
-                'View Timezone',
-                'View Default Page',
-                'View Exclude Query Parameters',
-                'View Currency',
-                'View Site Search Query Parameters',
-                'View Strip Site Search Query Parameters',
-                'View Site Search Category Parameters',
-                'View Strip Site Search Category Parameters'
-            ];
+            cells = [{
+                name: 'Account Name'
+            }, {
+                name: 'Account Id'
+            }, {
+                name: 'Property Name'
+            }, {
+                name: 'Property Id'
+            }, {
+                name: 'View Name'
+            }, {
+                name: 'View Id'
+            }, {
+                name: 'View Website URL'
+            }, {
+                name: 'View Timezone'
+            }, {
+                name: 'View Default Page'
+            }, {
+                name: 'View Exclude Query Parameters'
+            }, {
+                name: 'View Currency'
+            }, {
+                name: 'View Site Search Query Parameters'
+            }, {
+                name: 'View Strip Site Search Query Parameters'
+            }, {
+                name: 'View Site Search Category Parameters',
+            }, {
+                name: 'View Strip Site Search Category Parameters'
+            }];
 
             break;
 
         case 'Filters - Account Level':
 
-            arr = [
-                'Account Name',
-                'Account Id',
-                'Filter Name',
-                'Filter Id',
-                'Filter Type',
-                'Filter Field',
-                'Filter MatchType',
-                'Filter ExpressionValue',
-                'Filter CaseSensitive',
-                'Filter SearchString',
-                'Filter ReplaceString',
-                'Filter FieldA',
-                'Filter ExtractA',
-                'Filter FieldB',
-                'Filter ExtractB',
-                'Filter OutputToField',
-                'Filter OutputConstructor',
-                'Filter FieldARequired',
-                'Filter FieldBRequired',
-                'Filter OverrideOutputField',
-                'Filter CaseSensitive'
-            ];
+            cells = [{
+                name: 'Account Name'
+            }, {
+                name: 'Account Id'
+            }, {
+                name: 'Filter Name'
+            }, {
+                name: 'Filter Id'
+            }, {
+                name: 'Filter Type'
+            }, {
+                name: 'Filter Field'
+            }, {
+                name: 'Filter MatchType'
+            }, {
+                name: 'Filter ExpressionValue'
+            }, {
+                name: 'Filter CaseSensitive'
+            }, {
+                name: 'Filter SearchString'
+            }, {
+                name: 'Filter ReplaceString'
+            }, {
+                name: 'Filter FieldA'
+            }, {
+                name: 'Filter ExtractA'
+            }, {
+                name: 'Filter FieldB'
+            }, {
+                name: 'Filter ExtractB'
+            }, {
+                name: 'Filter OutputToField'
+            }, {
+                name: 'Filter OutputConstructor'
+            }, {
+                name: 'Filter FieldARequired'
+            }, {
+                name: 'Filter FieldBRequired'
+            }, {
+                name: 'Filter OverrideOutputField'
+            }, {
+                name: 'Filter CaseSensitive'
+            }];
 
             break;
 
         case 'Goals':
 
-            arr = [
-                'Account Name',
-                'Account Id',
-                'Property Name',
-                'Property Id',
-                'View Name',
-                'View Id',
-                'Goal Name',
-                'Goal Id',
-                'Goal Type',
-                'Goal Active',
-                'Goal Value',
-                'Goal Detail URL',
-                'Goal Detail CaseSensitive',
-                'Goal Detail MatchType',
-                'Goal Detail FirstStepRequired',
-                'Goal Detail Step 1',
-                'Goal Detail Step 2',
-                'Goal Detail Step 3',
-                'Goal Detail Step 4',
-                'Goal Detail Step 5',
-                'Goal Detail Step 6',
-                'Goal Detail Step 7',
-                'Goal Detail Step 8',
-                'Goal Detail Step 9',
-                'Goal Detail Step 10',
-                'Goal Detail ComparisonType',
-                'Goal Detail ComparisonValue',
-                'Goal Event Condition Type',
-                'Goal Event Condition MatchType',
-                'Goal Event Condition Expression',
-                'Goal Event Condition Type',
-                'Goal Event Condition MatchType',
-                'Goal Event Condition Expression',
-                'Goal Event Condition Type',
-                'Goal Event Condition MatchType',
-                'Goal Event Condition Expression',
-                'Goal Event Condition Type',
-                'Goal Event Condition ComparisonType',
-                'Goal Event Condition ComparisonValue'
-            ];
+            cells = [{
+                name: 'Account Name'
+            }, {
+                name: 'Account Id'
+            }, {
+                name: 'Property Name'
+            }, {
+                name: 'Property Id'
+            }, {
+                name: 'View Name'
+            }, {
+                name: 'View Id'
+            }, {
+                name: 'Goal Name'
+            }, {
+                name: 'Goal Id'
+            }, {
+                name: 'Goal Type'
+            }, {
+                name: 'Goal Active'
+            }, {
+                name: 'Goal Value'
+            }, {
+                name: 'Goal Detail URL',
+                color: colors.green
+            }, {
+                name: 'Goal Detail CaseSensitive',
+                color: colors.green
+            }, {
+                name: 'Goal Detail MatchType',
+                color: colors.green
+            }, {
+                name: 'Goal Detail FirstStepRequired',
+                color: colors.green
+            }, {
+                name: 'Goal Detail Step 1',
+                color: colors.green
+            }, {
+                name: 'Goal Detail Step 2',
+                color: colors.green
+            }, {
+                name: 'Goal Detail Step 3',
+                color: colors.green
+            }, {
+                name: 'Goal Detail Step 4',
+                color: colors.green
+            }, {
+                name: 'Goal Detail Step 5',
+                color: colors.green
+            }, {
+                name: 'Goal Detail Step 6',
+                color: colors.green
+            }, {
+                name: 'Goal Detail Step 7',
+                color: colors.green
+            }, {
+                name: 'Goal Detail Step 8',
+                color: colors.green
+            }, {
+                name: 'Goal Detail Step 9',
+                color: colors.green
+            }, {
+                name: 'Goal Detail Step 10',
+                color: colors.green
+            }, {
+                name: 'Goal Detail ComparisonType',
+                color: colors.purple
+            }, {
+                name: 'Goal Detail ComparisonValue',
+                color: colors.purple
+            }, {
+                name: 'Goal Event Condition Type',
+                color: colors.yellow
+            }, {
+                name: 'Goal Event Condition MatchType',
+                color: colors.yellow
+            }, {
+                name: 'Goal Event Condition Expression',
+                color: colors.yellow
+            }, {
+                name: 'Goal Event Condition Type',
+                color: colors.yellow
+            }, {
+                name: 'Goal Event Condition MatchType',
+                color: colors.yellow
+            }, {
+                name: 'Goal Event Condition Expression',
+                color: colors.yellow
+            }, {
+                name: 'Goal Event Condition Type',
+                color: colors.yellow
+            }, {
+                name: 'Goal Event Condition MatchType',
+                color: colors.yellow
+            }, {
+                name: 'Goal Event Condition Expression',
+                color: colors.yellow
+            }, {
+                name: 'Goal Event Condition Type',
+                color: colors.yellow
+            }, {
+                name: 'Goal Event Condition ComparisonType',
+                color: colors.yellow
+            }, {
+                name: 'Goal Event Condition ComparisonValue',
+                color: colors.yellow
+            }];
 
             break;
 
         default:
-            arr = [];
+            cells = [];
 
         }
 
-        return [arr];
+        return {
+            values: [cells.map(function (cell) { return cell.name; })],
+            colors: [cells.map(function (cell) { return cell.color || colors.blue; })]
+        };
     },
 
     build: function () {
         var header = this.getHeaderRow();
-        var headerLen = header[0].length;
+        var headerLen = header.values[0].length;
         var headerRow = this.sheet.setRowHeight(1, 35).getRange(1, 1, 1, headerLen);
         var dataRange = this.sheet.getRange(2, 1, this.data.length, headerLen);
         var allData = this.sheet.getRange(2, 1, this.sheet.getMaxRows(), headerLen);
 
         // add header row
         headerRow
-            .setBackground('#4d90fe')
+            .setBackgrounds(header.colors)
             .setFontColor('white')
             .setFontSize(12)
             .setFontWeight('bold')
             .setVerticalAlignment('middle')
-            .setValues(header);
+            .setValues(header.values);
 
         // clear existing data
         if (!dataRange.isBlank()) {
@@ -187,7 +304,7 @@ Sheet.prototype = {
         dataRange.setValues(this.data);
 
         // auto resize all columns
-        header[0].forEach(function (e, i) {
+        header.values[0].forEach(function (e, i) {
             this.sheet.autoResizeColumn(i + 1);
         }, this);
 
