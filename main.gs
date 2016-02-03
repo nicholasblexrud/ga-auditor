@@ -165,19 +165,34 @@ Sheet.prototype = {
     build: function () {
         var header = this.getHeaderRow();
         var headerLen = header[0].length;
+        var headerRow = this.sheet.setRowHeight(1, 35).getRange(1, 1, 1, headerLen);
         var dataRange = this.sheet.getRange(2, 1, this.data.length, headerLen);
         var allData = this.sheet.getRange(2, 1, this.sheet.getMaxRows(), headerLen);
 
         // add header row
-        this.sheet.getRange(1, 1, 1, headerLen).setValues(header);
+        headerRow
+            .setBackground('#4d90fe')
+            .setFontColor('white')
+            .setFontSize(12)
+            .setFontWeight('bold')
+            .setVerticalAlignment('middle')
+            .setValues(header);
 
-        // if there is data, remove it
+        // clear existing data
         if (!dataRange.isBlank()) {
             allData.clearContent();
         }
 
-        // set data
+        // add data to sheet
         dataRange.setValues(this.data);
+
+        // auto resize all columns
+        header[0].forEach(function (e, i) {
+            this.sheet.autoResizeColumn(i + 1);
+        }, this);
+
+        // freeze the header row
+        this.sheet.setFrozenRows(1);
     }
 };
 
@@ -554,7 +569,7 @@ function buildSheetWithData(sheetName, data) {
 
 function doAuditOfAccounts(selectedAccounts) {
     var api = new Api(selectedAccounts);
-    
+
     api.getViewFilterData(function (results) {
         buildSheetWithData('Filters - View Level', results);
     });
