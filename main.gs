@@ -712,3 +712,10 @@ function prepareIncomingAccounts(selectedAccounts) {
 
     return doAuditOfAccounts(accountsObj);
 }
+
+function jsonAccountSummary() {
+    var accountSummaries = getAccountSummaries();
+
+    return JSON.stringify(accountSummaries, ['name', 'id', 'webProperties', 'profiles']);
+
+}
