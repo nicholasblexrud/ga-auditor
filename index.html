@@ -10,31 +10,31 @@
     <form class="sidebar" id="new-audit-data" name="new-audit-data">
 
         <section>
-            <h2>1) Select Account Information</h2>
+            <h2>1) Select Account</h2>
          
             <script> var accounts =<?!= jsonAccountSummary() ?>;</script>
 
             <div class="row form-group">
                 <label for="account">Account</label>
-                <select id="account" class="full"></select>
+                <select id="account" name="account" class="full"></select>
+            </div>
+
+<!--             <div class="row form-group">
+                <label for="property">Property</label>
+                <select id="property" name="property" class="full"></select>
             </div>
 
             <div class="row form-group">
-                <label for="webproperty">Property</label>
-                <select id="webproperty" class="full"></select>
-            </div>
-
-            <div class="row form-group">
-                <label for="profile">View (Profile)</label>
-                <select id="profile" name="ids" class="full"></select>
-            </div>
+                <label for="view">View (Profile)</label>
+                <select id="view" name="view" class="full"></select>
+            </div> -->
         </section>
 
         <section>
             <h2>2) Select Report</h2>
             <div class="row form-group">
                 <label for="report">Report</label>
-                <select id="reports" class="full" name="reports"></select>
+                <select id="report" class="full" name="report"></select>
             </div>
         </section>
 

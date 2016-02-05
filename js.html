@@ -14,12 +14,12 @@ function appendOptionsToSelect(array, selector, isProfile) {
     });
 }
 
-function updateSelectOptions(select, options) {
-    select.innerHTML = options.map(function (option, i) {
-        return '<option value="' + (option.value || i) + '">' +
-            option.name + '</option>';
-    }).join('');
-}
+// function updateSelectOptions(select, options) {
+//     select.innerHTML = options.map(function (option, i) {
+//         return '<option value="' + (option.value || i) + '">' +
+//             option.name + '</option>';
+//     }).join('');
+// }
 
 var audit = {
 
@@ -59,41 +59,38 @@ var audit = {
     },
 
     showAccounts: function (accounts) {
-        var firstProperties = accounts[0].webProperties;
-        var firstProfiles = firstProperties[0].profiles;
-
         appendOptionsToSelect(accounts, '#account');
-        appendOptionsToSelect(firstProperties, '#webproperty');
-        appendOptionsToSelect(firstProfiles, '#profile', true);
+        // appendOptionsToSelect(accounts[0].webProperties, '#property');
+        // appendOptionsToSelect(accounts[0].webProperties[0].profiles, '#view', true);
     },
 
     showReports: function (reports) {
         appendOptionsToSelect(reports, '#report');
-    },
-
-    handleAccountSelectChange: function () {
-
-        var accountIndex = $(this).val();
-        var account = accounts[accountIndex];
-
-        var webpropertySelect = document.getElementById('webproperty');
-        var profileSelect = document.getElementById('profile');
-
-        updateSelectOptions(webpropertySelect, account.webProperties);
-        updateSelectOptions(profileSelect, account.webProperties[0].profiles);
-    },
-
-    handlePropertySelectChange: function () {
-
-        var accountIndex = $('#account').val();
-        var account = accounts[accountIndex];
-        var webpropertyIndex = $(this).val();
-        var webproperty = account.webProperties[webpropertyIndex];
-
-        var profileSelect = document.getElementById('profile');
-
-        updateSelectOptions(profileSelect, webproperty.profiles);
     }
+
+    // handleAccountSelectChange: function () {
+
+    //     var accountIndex = $(this).val();
+    //     var account = accounts[accountIndex];
+
+    //     var propertySelect = document.getElementById('property');
+    //     var viewSelect = document.getElementById('view');
+
+    //     updateSelectOptions(propertySelect, account.webProperties);
+    //     updateSelectOptions(viewSelect, account.webProperties[0].profiles);
+    // },
+
+    // handlePropertySelectChange: function () {
+
+    //     var accountIndex = $('#account').val();
+    //     var account = accounts[accountIndex];
+    //     var propertyIndex = $(this).val();
+    //     var property = account.webProperties[propertyIndex];
+
+    //     var viewSelect = document.getElementById('view');
+
+    //     updateSelectOptions(viewSelect, property.profiles);
+    // }
 };
 
 $(function () {
@@ -110,9 +107,9 @@ $(function () {
     // form - close
     $('#close').on('click', audit.close);
 
-    $('#account').on('change', audit.handleAccountSelectChange);
+    // $('#account').on('change', audit.handleAccountSelectChange);
 
-    $('#webproperty').on('change', audit.handlePropertySelectChange);
+    // $('#webproperty').on('change', audit.handlePropertySelectChange);
 
 
 });
