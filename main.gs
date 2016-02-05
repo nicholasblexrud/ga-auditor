@@ -678,6 +678,23 @@ function getAccountSummaries() {
     return items;
 }
 
+function getReports() {
+
+    return [{
+        'name': 'View Filters',
+        'id': 1234
+    }, {
+        'name': 'View Settings',
+        'id': 2345
+    }, {
+        'name': 'Account Filters',
+        'id': 3456
+    }, {
+        'name': 'View Goals',
+        'id': 4567
+    }];
+}
+
 function buildSheetWithData(sheetName, data) {
     var sheet = new Sheet(sheetName, data);
 

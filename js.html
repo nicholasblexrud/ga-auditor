@@ -1,5 +1,25 @@
 <script>
-/*globals google */
+/*globals google, accounts */
+
+function appendOptionsToSelect(array, selector, isProfile) {
+    var select = $(selector);
+    select.empty();
+
+    array.forEach(function (element, index) {
+        var setValue = isProfile ? element.id : index;
+        var option = $('<option>')
+            .attr('value', setValue)
+            .text(element.name);
+        select.append(option);
+    });
+}
+
+function updateSelectOptions(select, options) {
+    select.innerHTML = options.map(function (option, i) {
+        return '<option value="' + (option.value || i) + '">' +
+            option.name + '</option>';
+    }).join('');
+}
 
 var audit = {
 
@@ -20,35 +40,66 @@ var audit = {
         window.alert('An error has occured, please try again.');
     },
 
-    loadAccounts: function () {
+    loadAccountsAndReports: function () {
         $('.sidebar').hide();
         $('.loading').addClass('spinner');
-    
+
         google.script.run
             .withSuccessHandler(this.showAccounts)
             .withFailureHandler(this.showError)
             .getAccountSummaries(); // located in server.gs
+
+        google.script.run
+            .withSuccessHandler(this.showReports)
+            .withFailureHandler(this.showError)
+            .getReports();
+
+        $('.loading').removeClass('spinner');
+        $('.sidebar').show();
     },
 
     showAccounts: function (accounts) {
-        var select = $('#accounts');
-        select.empty();
-        accounts.forEach(function (account) {
-            var option = $('<option>')
-                .attr('value', account.id)
-                .text(account.name);
-            select.append(option);
-        });
-        $('.loading').removeClass('spinner');        
-        $('.sidebar').show();
+        var firstProperties = accounts[0].webProperties;
+        var firstProfiles = firstProperties[0].profiles;
 
+        appendOptionsToSelect(accounts, '#account');
+        appendOptionsToSelect(firstProperties, '#webproperty');
+        appendOptionsToSelect(firstProfiles, '#profile', true);
+    },
+
+    showReports: function (reports) {
+        appendOptionsToSelect(reports, '#report');
+    },
+
+    handleAccountSelectChange: function () {
+
+        var accountIndex = $(this).val();
+        var account = accounts[accountIndex];
+
+        var webpropertySelect = document.getElementById('webproperty');
+        var profileSelect = document.getElementById('profile');
+
+        updateSelectOptions(webpropertySelect, account.webProperties);
+        updateSelectOptions(profileSelect, account.webProperties[0].profiles);
+    },
+
+    handlePropertySelectChange: function () {
+
+        var accountIndex = $('#account').val();
+        var account = accounts[accountIndex];
+        var webpropertyIndex = $(this).val();
+        var webproperty = account.webProperties[webpropertyIndex];
+
+        var profileSelect = document.getElementById('profile');
+
+        updateSelectOptions(profileSelect, webproperty.profiles);
     }
 };
 
 $(function () {
 
     // load Google Analytics accounts
-    audit.loadAccounts();
+    audit.loadAccountsAndReports();
 
     // initialize multi-selects
     $('select[multiple]').select2();
@@ -58,6 +109,10 @@ $(function () {
 
     // form - close
     $('#close').on('click', audit.close);
+
+    $('#account').on('change', audit.handleAccountSelectChange);
+
+    $('#webproperty').on('change', audit.handlePropertySelectChange);
 
 
 });

@@ -5,9 +5,8 @@ This will become a public Add-on for Google Spreadsheets. It is a Google Apps Sc
  - document code
  - add another header row for report title?
  - provide color schema for different goal types (green = event funnel)
- - include all 20 goal steps
+ - include all 20 goal steps?
  - review [UI Style Guide for Add-ons](https://developers.google.com/apps-script/add-ons/style)
- - use `toast()` to notify user that things are happening
- - better naming for header rows 
+ - better naming for header rows
 
 

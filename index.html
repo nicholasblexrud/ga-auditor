@@ -7,21 +7,44 @@
 </head>
 <body>
     <div class='loading spinner'></div>
-    <script> var accounts =<?!= jsonAccountSummary() ?>;</script>
     <form class="sidebar" id="new-audit-data" name="new-audit-data">
+
         <section>
-            <h2>Select Account(s) to Audit</h2>
+            <h2>1) Select Account Information</h2>
+         
+            <script> var accounts =<?!= jsonAccountSummary() ?>;</script>
+
             <div class="row form-group">
                 <label for="account">Account</label>
-                <div class="select2-container select2-container-multi full" id="s2id_accounts"></div>
-                <select class="full" data-placeholder="Search accounts..." id="accounts" multiple name="accounts" style="display: none;"></select>
+                <select id="account" class="full"></select>
+            </div>
+
+            <div class="row form-group">
+                <label for="webproperty">Property</label>
+                <select id="webproperty" class="full"></select>
+            </div>
+
+            <div class="row form-group">
+                <label for="profile">View (Profile)</label>
+                <select id="profile" name="ids" class="full"></select>
             </div>
         </section>
+
+        <section>
+            <h2>2) Select Report</h2>
+            <div class="row form-group">
+                <label for="report">Report</label>
+                <select id="reports" class="full" name="reports"></select>
+            </div>
+        </section>
+
         <div class="row form-group">
             <button class="action" id="submit" type="submit">Audit Account(s)</button> 
             <button id="close" type="button">Cancel</button>
         </div>
+
         <p class="help">If you have questions about using this add-on, check out the <a href="#">github</a> for more detailed instructions.</p>
+
     </form>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script> 
     <script src="//cdnjs.cloudflare.com/ajax/libs/select2/3.2/select2.min.js"></script> 
