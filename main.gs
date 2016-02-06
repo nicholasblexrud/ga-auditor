@@ -319,11 +319,11 @@ Sheet.prototype = {
  *
  */
 
-var Api = function (selectedAccounts) {
-    this.selectedAccounts = selectedAccounts;
-};
+var Api = {
+    init: function (account) {
+        this.selectedAccounts = account;
+    },
 
-Api.prototype = {
     createFilterRow: function (type, details) {
         var len = 16;
         var arr = Array.call(null, len);
@@ -668,7 +668,7 @@ function showSidebar() {
     return SpreadsheetApp.getUi().showSidebar(ui);
 }
 
-function getAccountSummaries() {
+function getAccounts() {
     var items = Analytics.Management.AccountSummaries.list().getItems();
 
     if (!items) {
@@ -681,17 +681,17 @@ function getAccountSummaries() {
 function getReports() {
 
     return [{
-        'name': 'View Filters',
-        'id': 1234
+        'name': 'Filters',
+        'id': 'getViewFilterData'
     }, {
         'name': 'View Settings',
-        'id': 2345
+        'id': 'getViewData'
     }, {
         'name': 'Account Filters',
-        'id': 3456
+        'id': 'getAccountFilterData'
     }, {
-        'name': 'View Goals',
-        'id': 4567
+        'name': 'Goals',
+        'id': 'getGoalData'
     }];
 }
 
@@ -701,38 +701,21 @@ function buildSheetWithData(sheetName, data) {
     return sheet.build();
 }
 
-function doAuditOfAccounts(selectedAccounts) {
-    var api = new Api(selectedAccounts);
+function doAuditOfAccount(account, reportGetter) {
+    Api.init(account);
 
-    api.getViewFilterData(function (results) {
-        buildSheetWithData('Filters - View Level', results);
-    });
-
-    api.getViewData(function (results) {
-        buildSheetWithData('Views', results);
-    });
-
-    api.getAccountFilterData(function (results) {
-        buildSheetWithData('Filters - Account Level', results);
-    });
-
-    api.getGoalData(function (results) {
+    Api[reportGetter](function (results) {
         buildSheetWithData('Goals', results);
     });
 
 }
 
-function prepareIncomingAccounts(selectedAccounts) {
-    var accountSummaries = getAccountSummaries();
-    var selectedIds = selectedAccounts.map(function (account) { return account.value; });
-    var accountsObj = accountSummaries.filter(function (account) { return selectedIds.indexOf(account.id) > -1; });
+function saveReportDataFromSidebar(selectedAccountAndReport) {
+    var allAccounts = getAccounts();
 
-    return doAuditOfAccounts(accountsObj);
-}
+    var reportGetter = selectedAccountAndReport[1].value;
 
-function jsonAccountSummary() {
-    var accountSummaries = getAccountSummaries();
+    var account = allAccounts.filter(function (account) { return account.id === selectedAccountAndReport[0].value; });
 
-    return JSON.stringify(accountSummaries, ['name', 'id', 'webProperties', 'profiles']);
-
+    return doAuditOfAccount(account, reportGetter);
 }

@@ -6,28 +6,14 @@
     <?!= HtmlService.createHtmlOutputFromFile('css').getContent(); ?>
 </head>
 <body>
-    <div class='loading spinner'></div>
     <form class="sidebar" id="new-audit-data" name="new-audit-data">
 
         <section>
             <h2>1) Select Account</h2>
-         
-            <script> var accounts =<?!= jsonAccountSummary() ?>;</script>
-
             <div class="row form-group">
                 <label for="account">Account</label>
                 <select id="account" name="account" class="full"></select>
             </div>
-
-<!--             <div class="row form-group">
-                <label for="property">Property</label>
-                <select id="property" name="property" class="full"></select>
-            </div>
-
-            <div class="row form-group">
-                <label for="view">View (Profile)</label>
-                <select id="view" name="view" class="full"></select>
-            </div> -->
         </section>
 
         <section>
