@@ -6,6 +6,20 @@
  *
  */
 
+var colors = {
+    blue: '#4d90fe',
+    green: '#0fc357',
+    purple: '#c27ba0',
+    yellow: '#e7fe2b'
+};
+
+function headerValuesAndColors(array) {
+    return {
+        values: [array.map(function (element) { return element.name; })],
+        colors: [array.map(function (element) { return element.color || colors.blue; })]
+    };
+}
+
 function replaceSparseInArrayWithDefault(array, defaultValue, length) {
     var i;
     for (i = 0; i < length; i++) {
@@ -29,136 +43,88 @@ function validateCallback(callback) {
  *
  */
 
-var Sheet = function (name, data) {
-    this.workbook = SpreadsheetApp.getActiveSpreadsheet();
-    this.name = name;
-    this.data = data;
-    this.sheet = this.workbook.getSheetByName(this.name) || this.workbook.insertSheet(this.name);
+var sheet = {
+    init: function (config) {
+        this.workbook = SpreadsheetApp.getActiveSpreadsheet();
+        this.name = config.name;
+        this.header = config.header;
+        this.headerLength = this.header.values[0].length;
+        this.data = config.data;
+        this.sheet = this.workbook.getSheetByName(this.name) || this.workbook.insertSheet(this.name);
+
+        return this;
+    },
+
+    buildHeader: function (cb) {
+        var headerRow = this.sheet.setRowHeight(1, 35).getRange(1, 1, 1, this.headerLength);
+
+        // add style header row
+        headerRow
+            .setBackgrounds(this.header.colors)
+            .setFontColor('white')
+            .setFontSize(12)
+            .setFontWeight('bold')
+            .setVerticalAlignment('middle')
+            .setValues(this.header.values);
+
+        // freeze the header row
+        this.sheet.setFrozenRows(1);
+
+        cb.call(this);
+
+    },
+
+    buildData: function (cb) {
+        var dataRange = this.sheet.getRange(2, 1, this.data.length, this.headerLength);
+        var allData = this.sheet.getRange(2, 1, this.sheet.getMaxRows(), this.headerLength);
+
+        // clear existing data
+        if (!dataRange.isBlank()) {
+            allData.clearContent();
+        }
+
+        // add data to sheet
+        dataRange.setValues(this.data);
+
+        cb.call(this);
+    },
+
+    cleanup: function () {
+        // auto resize all columns
+        this.header.values[0].forEach(function (e, i) {
+            this.sheet.autoResizeColumn(i + 1);
+        }, this);
+    },
+
+    build: function () {
+        this.buildHeader(function () {
+            this.buildData(function () {
+                this.cleanup();
+            });
+        });
+    }
 };
 
-Sheet.prototype = {
+/*
+ *
+ * API
+ *
+ */
 
-    getHeaderRow: function () {
-        var colors = {
-            blue: '#4d90fe',
-            green: '#0fc357',
-            purple: '#c27ba0',
-            yellow: '#e7fe2b'
-        };
+var api = {
 
-        var cells;
+    goals: {
+        init: function (config) {
+            this.account = config.account;
+            this.accountName = this.account.name;
 
-        switch (this.name) {
+            this.header = this.getHeader();
 
-        case 'Filters - View Level':
-
-            cells = [{
-                name: 'Account Name'
-            }, {
-                name: 'Account Id'
-            }, {
-                name: 'Property Name'
-            }, {
-                name: 'Property Id'
-            }, {
-                name: 'View Name'
-            }, {
-                name: 'View Id'
-            }, {
-                name: 'Filter Name'
-            }, {
-                name: 'Filter Id'
-            }];
-
-            break;
-
-        case 'Views':
-
-            cells = [{
-                name: 'Account Name'
-            }, {
-                name: 'Account Id'
-            }, {
-                name: 'Property Name'
-            }, {
-                name: 'Property Id'
-            }, {
-                name: 'View Name'
-            }, {
-                name: 'View Id'
-            }, {
-                name: 'View Website URL'
-            }, {
-                name: 'View Timezone'
-            }, {
-                name: 'View Default Page'
-            }, {
-                name: 'View Exclude Query Parameters'
-            }, {
-                name: 'View Currency'
-            }, {
-                name: 'View Site Search Query Parameters'
-            }, {
-                name: 'View Strip Site Search Query Parameters'
-            }, {
-                name: 'View Site Search Category Parameters',
-            }, {
-                name: 'View Strip Site Search Category Parameters'
-            }];
-
-            break;
-
-        case 'Filters - Account Level':
-
-            cells = [{
-                name: 'Account Name'
-            }, {
-                name: 'Account Id'
-            }, {
-                name: 'Filter Name'
-            }, {
-                name: 'Filter Id'
-            }, {
-                name: 'Filter Type'
-            }, {
-                name: 'Filter Field'
-            }, {
-                name: 'Filter MatchType'
-            }, {
-                name: 'Filter ExpressionValue'
-            }, {
-                name: 'Filter CaseSensitive'
-            }, {
-                name: 'Filter SearchString'
-            }, {
-                name: 'Filter ReplaceString'
-            }, {
-                name: 'Filter FieldA'
-            }, {
-                name: 'Filter ExtractA'
-            }, {
-                name: 'Filter FieldB'
-            }, {
-                name: 'Filter ExtractB'
-            }, {
-                name: 'Filter OutputToField'
-            }, {
-                name: 'Filter OutputConstructor'
-            }, {
-                name: 'Filter FieldARequired'
-            }, {
-                name: 'Filter FieldBRequired'
-            }, {
-                name: 'Filter OverrideOutputField'
-            }, {
-                name: 'Filter CaseSensitive'
-            }];
-
-            break;
-
-        case 'Goals':
-
-            cells = [{
+            return this;
+        },
+        name: 'Goals',
+        getHeader: function () {
+            var data = [{
                 name: 'Account Name'
             }, {
                 name: 'Account Id'
@@ -266,246 +232,210 @@ Sheet.prototype = {
                 color: colors.yellow
             }];
 
-            break;
+            return headerValuesAndColors(data);
+        },
+        row: function (type, details) {
+            var len = 28;
+            var arr = Array.call(null, len);
+            var goalDetailStep = [];
+            var conditionDetail = [];
+            var steps, conditions;
 
-        default:
-            cells = [];
+            switch (type) {
 
-        }
+            case 'urlDestinationDetails':
+                steps = details.steps;
 
-        return {
-            values: [cells.map(function (cell) { return cell.name; })],
-            colors: [cells.map(function (cell) { return cell.color || colors.blue; })]
-        };
-    },
+                if (steps) {
+                    steps.forEach(function (step) {
+                        goalDetailStep.push(step.url);
+                    });
+                }
 
-    build: function () {
-        var header = this.getHeaderRow();
-        var headerLen = header.values[0].length;
-        var headerRow = this.sheet.setRowHeight(1, 35).getRange(1, 1, 1, headerLen);
-        var dataRange = this.sheet.getRange(2, 1, this.data.length, headerLen);
-        var allData = this.sheet.getRange(2, 1, this.sheet.getMaxRows(), headerLen);
+                arr[0] = details.url;
+                arr[1] = details.caseSensitive;
+                arr[2] = details.matchType;
+                arr[3] = details.firstStepRequired;
+                arr[4] = goalDetailStep[0];
+                arr[5] = goalDetailStep[1];
+                arr[6] = goalDetailStep[2];
+                arr[7] = goalDetailStep[3];
+                arr[8] = goalDetailStep[4];
+                arr[9] = goalDetailStep[5];
+                arr[10] = goalDetailStep[6];
+                arr[11] = goalDetailStep[7];
+                arr[12] = goalDetailStep[8];
+                arr[13] = goalDetailStep[9];
 
-        // add header row
-        headerRow
-            .setBackgrounds(header.colors)
-            .setFontColor('white')
-            .setFontSize(12)
-            .setFontWeight('bold')
-            .setVerticalAlignment('middle')
-            .setValues(header.values);
+                goalDetailStep = [];
 
-        // clear existing data
-        if (!dataRange.isBlank()) {
-            allData.clearContent();
-        }
+                break;
 
-        // add data to sheet
-        dataRange.setValues(this.data);
+            case 'visitTimeOnSiteDetails_OR_visitNumPagesDetails':
+                arr[14] = details.comparisonType;
+                arr[15] = details.comparisonValue;
 
-        // auto resize all columns
-        header.values[0].forEach(function (e, i) {
-            this.sheet.autoResizeColumn(i + 1);
-        }, this);
+                break;
 
-        // freeze the header row
-        this.sheet.setFrozenRows(1);
-    }
-};
+            case 'eventDetails':
+                conditions = details.eventConditions;
 
-/*
- *
- * API
- *
- */
+                if (conditions) {
+                    conditions.forEach(function (condition) {
+                        if (condition.type === 'VALUE') {
+                            conditionDetail.push(
+                                condition.type,
+                                condition.comparisonType,
+                                condition.comparisonValue
+                            );
+                        } else {
+                            conditionDetail.push(
+                                condition.type,
+                                condition.matchType,
+                                condition.expression
+                            );
+                        }
+                    });
+                }
 
-var Api = {
+                arr[16] = conditionDetail[0];
+                arr[17] = conditionDetail[1];
+                arr[18] = conditionDetail[2];
+                arr[19] = conditionDetail[3];
+                arr[20] = conditionDetail[4];
+                arr[21] = conditionDetail[5];
+                arr[22] = conditionDetail[6];
+                arr[23] = conditionDetail[7];
+                arr[24] = conditionDetail[8];
+                arr[25] = conditionDetail[9];
+                arr[26] = conditionDetail[10];
+                arr[27] = conditionDetail[11];
 
-    init: function (account) {
-        this.selectedAccounts = account;
-    },
+                conditionDetail = [];
 
-    createFilterRow: function (type, details) {
-        var len = 16;
-        var arr = Array.call(null, len);
-
-        switch (type) {
-
-        case 'EXCLUDE_OR_INCLUDE':
-            arr[0] = details.field;
-            arr[1] = details.matchType;
-            arr[2] = details.expressionValue;
-            arr[3] = details.caseSensitive;
-            break;
-
-        case 'UPPERCASE_OR_LOWERCASE':
-            arr[0] = details.field;
-            break;
-
-        case 'SEARCH_AND_REPLACE':
-            arr[0] = details.field;
-            arr[3] = details.searchString;
-            arr[4] = details.replaceString;
-            arr[5] = details.caseSensitive;
-            break;
-
-        case 'ADVANCED':
-            arr[0] = details.field;
-            arr[6] = details.fieldA;
-            arr[7] = details.extractA;
-            arr[8] = details.fieldB;
-            arr[9] = details.extractB;
-            arr[10] = details.outputToField;
-            arr[11] = details.outputConstructor;
-            arr[12] = details.fieldARequired;
-            arr[13] = details.fieldBRequired;
-            arr[14] = details.overrideOutputField;
-            arr[15] = details.caseSensitive;
-            break;
-
-        }
-
-        return replaceSparseInArrayWithDefault(arr, '-', len);
-    },
-
-    createGoalRow: function (type, details) {
-        var len = 28;
-        var arr = Array.call(null, len);
-        var goalDetailStep = [];
-        var conditionDetail = [];
-        var steps, conditions;
-
-        switch (type) {
-
-        case 'urlDestinationDetails':
-            steps = details.steps;
-
-            if (steps) {
-                steps.forEach(function (step) {
-                    goalDetailStep.push(step.url);
-                });
+                break;
             }
 
-            arr[0] = details.url;
-            arr[1] = details.caseSensitive;
-            arr[2] = details.matchType;
-            arr[3] = details.firstStepRequired;
-            arr[4] = goalDetailStep[0];
-            arr[5] = goalDetailStep[1];
-            arr[6] = goalDetailStep[2];
-            arr[7] = goalDetailStep[3];
-            arr[8] = goalDetailStep[4];
-            arr[9] = goalDetailStep[5];
-            arr[10] = goalDetailStep[6];
-            arr[11] = goalDetailStep[7];
-            arr[12] = goalDetailStep[8];
-            arr[13] = goalDetailStep[9];
+            return replaceSparseInArrayWithDefault(arr, '-', len);
+        },
+        wrapper: function (account, property, profile, cb) {
+            var goalsList = Analytics.Management.Goals.list(account, property, profile).getItems();
 
-            goalDetailStep = [];
+            validateCallback(cb);
 
-            break;
+            return cb.call(this, goalsList);
+        },
+        getData: function (cb) {
+            var details, rowDetails;
+            var results = [];
 
-        case 'visitTimeOnSiteDetails_OR_visitNumPagesDetails':
-            arr[14] = details.comparisonType;
-            arr[15] = details.comparisonValue;
-
-            break;
-
-        case 'eventDetails':
-            conditions = details.eventConditions;
-
-            if (conditions) {
-                conditions.forEach(function (condition) {
-                    if (condition.type === 'VALUE') {
-                        conditionDetail.push(
-                            condition.type,
-                            condition.comparisonType,
-                            condition.comparisonValue
-                        );
-                    } else {
-                        conditionDetail.push(
-                            condition.type,
-                            condition.matchType,
-                            condition.expression
-                        );
-                    }
-                });
-            }
-
-            arr[16] = conditionDetail[0];
-            arr[17] = conditionDetail[1];
-            arr[18] = conditionDetail[2];
-            arr[19] = conditionDetail[3];
-            arr[20] = conditionDetail[4];
-            arr[21] = conditionDetail[5];
-            arr[22] = conditionDetail[6];
-            arr[23] = conditionDetail[7];
-            arr[24] = conditionDetail[8];
-            arr[25] = conditionDetail[9];
-            arr[26] = conditionDetail[10];
-            arr[27] = conditionDetail[11];
-
-            conditionDetail = [];
-
-            break;
-        }
-
-        return replaceSparseInArrayWithDefault(arr, '-', len);
-    },
-
-    wrapperGetViewFilterData: function (account, property, profile, cb) {
-        var profileFilters = Analytics.Management.ProfileFilterLinks.list(account, property, profile).getItems();
-
-        validateCallback(cb);
-
-        return cb.call(this, profileFilters);
-    },
-
-    getViewFilterData: function (cb) {
-        var results = [];
-
-        this.selectedAccounts.forEach(function (account) {
-            account.webProperties.forEach(function (property) {
+            this.account.webProperties.forEach(function (property) {
                 property.profiles.forEach(function (profile) {
-                    this.wrapperGetViewFilterData(account.id, property.id, profile.id, function (filtersList) {
-                        filtersList.forEach(function (filter) {
-                            results.push([
-                                account.name,
-                                account.id,
+                    this.wrapper(this.account.id, property.id, profile.id, function (goalsList) {
+                        goalsList.forEach(function (goal) {
+                            var rowDefaults = [
+                                this.account.name,
+                                this.account.id,
                                 property.name,
                                 property.id,
                                 profile.name,
                                 profile.id,
-                                filter.filterRef.name,
-                                filter.filterRef.id
-                            ]);
-                        });
+                                goal.name,
+                                goal.id,
+                                goal.type,
+                                goal.active,
+                                goal.value
+                            ];
+                            if (goal.urlDestinationDetails) {
+                                details = goal.urlDestinationDetails;
+                                rowDetails = this.row('urlDestinationDetails', details);
+
+                                results.push(rowDefaults.concat(rowDetails));
+                            }
+
+                            if (goal.visitTimeOnSiteDetails || goal.visitNumPagesDetails) {
+                                details = goal.visitTimeOnSiteDetails || goal.visitNumPagesDetails;
+                                rowDetails = this.row('visitTimeOnSiteDetails_OR_visitNumPagesDetails', details);
+
+                                results.push(rowDefaults.concat(rowDetails));
+                            }
+
+                            if (goal.eventDetails) {
+                                details = goal.eventDetails;
+                                rowDetails = this.row('eventDetails', details);
+
+                                results.push(rowDefaults.concat(rowDetails));
+                            }
+
+                        }, this);
                     });
                 }, this);
             }, this);
-        }, this);
-
-        cb(results);
+            cb(results);
+        }
     },
 
-    wrapperGetViewData: function (account, property, cb) {
-        var viewsList = Analytics.Management.Profiles.list(account, property).getItems();
+    settings: {
+        init: function (config) {
+            this.account = config.account;
+            this.accountName = this.account.name;
 
-        validateCallback(cb);
+            this.header = this.getHeader();
 
-        return cb.call(this, viewsList);
-    },
+            return this;
+        },
+        name: 'Settings',
+        getHeader: function () {
+            var data = [{
+                name: 'Account Name'
+            }, {
+                name: 'Account Id'
+            }, {
+                name: 'Property Name'
+            }, {
+                name: 'Property Id'
+            }, {
+                name: 'View Name'
+            }, {
+                name: 'View Id'
+            }, {
+                name: 'View Website URL'
+            }, {
+                name: 'View Timezone'
+            }, {
+                name: 'View Default Page'
+            }, {
+                name: 'View Exclude Query Parameters'
+            }, {
+                name: 'View Currency'
+            }, {
+                name: 'View Site Search Query Parameters'
+            }, {
+                name: 'View Strip Site Search Query Parameters'
+            }, {
+                name: 'View Site Search Category Parameters',
+            }, {
+                name: 'View Strip Site Search Category Parameters'
+            }];
 
-    getViewData: function (cb) {
-        var results = [];
+            return headerValuesAndColors(data);
+        },
+        wrapper: function (account, property, cb) {
+            var viewsList = Analytics.Management.Profiles.list(account, property).getItems();
 
-        this.selectedAccounts.forEach(function (account) {
-            account.webProperties.forEach(function (property) {
-                this.wrapperGetViewData(account.id, property.id, function (profilesList) {
+            validateCallback(cb);
+
+            return cb.call(this, viewsList);
+        },
+        getData: function (cb) {
+            var results = [];
+
+            this.account.webProperties.forEach(function (property) {
+                this.wrapper(this.account.id, property.id, function (profilesList) {
                     profilesList.forEach(function (profile) {
                         results.push([
-                            account.name,
-                            account.id,
+                            this.account.name,
+                            this.account.id,
                             property.name,
                             property.id,
                             profile.name,
@@ -520,32 +450,209 @@ var Api = {
                             profile.siteSearchCategoryParameters,
                             profile.stripSiteSearchCategoryParameters
                         ]);
-                    });
+                    }, this);
                 });
             }, this);
-        }, this);
 
-        cb(results);
+            cb(results);
+        }
     },
 
-    wrapperGetAccountFilterData: function (account, cb) {
-        var filtersList = Analytics.Management.Filters.list(account).getItems();
+    filters: {
+        init: function (config) {
+            this.account = config.account;
+            this.accountName = this.account.name;
 
-        validateCallback(cb);
+            this.header = this.getHeader();
 
-        return cb.call(this, filtersList);
-    },
+            return this;
+        },
+        name: 'Filters',
+        getHeader: function () {
+            var data = [{
+                name: 'Account Name'
+            }, {
+                name: 'Account Id'
+            }, {
+                name: 'Property Name'
+            }, {
+                name: 'Property Id'
+            }, {
+                name: 'View Name'
+            }, {
+                name: 'View Id'
+            }, {
+                name: 'Filter Name'
+            }, {
+                name: 'Filter Id'
+            }, {
+                name: 'Filter Type'
+            }, {
+                name: 'Filter Field'
+            }, {
+                name: 'Filter MatchType'
+            }, {
+                name: 'Filter ExpressionValue'
+            }, {
+                name: 'Filter CaseSensitive'
+            }, {
+                name: 'Filter SearchString'
+            }, {
+                name: 'Filter ReplaceString'
+            }, {
+                name: 'Filter FieldA'
+            }, {
+                name: 'Filter ExtractA'
+            }, {
+                name: 'Filter FieldB'
+            }, {
+                name: 'Filter ExtractB'
+            }, {
+                name: 'Filter OutputToField'
+            }, {
+                name: 'Filter OutputConstructor'
+            }, {
+                name: 'Filter FieldARequired'
+            }, {
+                name: 'Filter FieldBRequired'
+            }, {
+                name: 'Filter OverrideOutputField'
+            }, {
+                name: 'Filter CaseSensitive'
+            }];
 
-    getAccountFilterData: function (cb) {
-        var details, rowDefaults, rowDetails;
-        var results = [];
+            return headerValuesAndColors(data);
+        },
+        row: function (type, details) {
+            var len = 16;
+            var arr = Array.call(null, len);
 
-        this.selectedAccounts.forEach(function (account) {
-            this.wrapperGetAccountFilterData(account.id, function (filtersList) {
-                filtersList.forEach(function (filter) {
+            switch (type) {
+
+            case 'EXCLUDE_OR_INCLUDE':
+                arr[0] = details.field;
+                arr[1] = details.matchType;
+                arr[2] = details.expressionValue;
+                arr[3] = details.caseSensitive;
+                break;
+
+            case 'UPPERCASE_OR_LOWERCASE':
+                arr[0] = details.field;
+                break;
+
+            case 'SEARCH_AND_REPLACE':
+                arr[0] = details.field;
+                arr[3] = details.searchString;
+                arr[4] = details.replaceString;
+                arr[5] = details.caseSensitive;
+                break;
+
+            case 'ADVANCED':
+                arr[0] = details.field;
+                arr[6] = details.fieldA;
+                arr[7] = details.extractA;
+                arr[8] = details.fieldB;
+                arr[9] = details.extractB;
+                arr[10] = details.outputToField;
+                arr[11] = details.outputConstructor;
+                arr[12] = details.fieldARequired;
+                arr[13] = details.fieldBRequired;
+                arr[14] = details.overrideOutputField;
+                arr[15] = details.caseSensitive;
+                break;
+
+            }
+
+            return replaceSparseInArrayWithDefault(arr, '-', len);
+        },
+
+        getData: function (cb) {
+            this.links(function (links) {
+                this.lists(function (lists) {
+
+                    //TODO: adjust column header
+                    links.forEach(function (link) {
+                        var linkFilterId = link[7];
+
+                        lists.forEach(function (list) {
+                            var listFilterId = list[3];
+                            if (linkFilterId === listFilterId) {
+                                link[8] = list[4];
+                                link[9] = list[5];
+                                link[10] = list[6];
+                                link[11] = list[7];
+                                link[12] = list[8];
+                                link[13] = list[9];
+                                link[14] = list[10];
+                                link[15] = list[11];
+                                link[16] = list[12];
+                                link[17] = list[13];
+                                link[18] = list[14];
+                                link[19] = list[15];
+                                link[20] = list[16];
+                                link[21] = list[17];
+                                link[22] = list[18];
+                                link[23] = list[19];
+                                link[24] = list[20];
+                            }
+                        });
+                    });
+                });
+
+                cb(links);
+            });
+        },
+
+        wrapperLinks: function (account, property, profile, cb) {
+            var links = Analytics.Management.ProfileFilterLinks.list(account, property, profile).getItems();
+
+            validateCallback(cb);
+
+            return cb.call(this, links);
+        },
+
+        wrapperLists: function (account, cb) {
+            var list = Analytics.Management.Filters.list(account).getItems();
+
+            validateCallback(cb);
+
+            return cb.call(this, list);
+        },
+
+        links: function (cb) {
+            var results = [];
+
+            this.account.webProperties.forEach(function (property) {
+                property.profiles.forEach(function (profile) {
+                    this.wrapperLinks(this.account.id, property.id, profile.id, function (links) {
+                        links.forEach(function (filter) {
+                            results.push([
+                                this.account.name,
+                                this.account.id,
+                                property.name,
+                                property.id,
+                                profile.name,
+                                profile.id,
+                                filter.filterRef.name,
+                                filter.filterRef.id
+                            ]);
+                        }, this);
+                    });
+                }, this);
+            }, this);
+
+            return cb.call(this, results);
+        },
+
+        lists: function (cb) {
+            var details, rowDefaults, rowDetails;
+            var results = [];
+
+            this.wrapperLists(this.account.id, function (list) {
+                list.forEach(function (filter) {
                     rowDefaults = [
-                        account.name,
-                        account.id,
+                        this.account.name,
+                        this.account.id,
                         filter.name,
                         filter.id,
                         filter.type
@@ -553,95 +660,36 @@ var Api = {
 
                     if (filter.type === 'EXCLUDE' || filter.type === 'INCLUDE') {
                         details = filter.getIncludeDetails() || filter.getExcludeDetails();
-                        rowDetails = this.createFilterRow('EXCLUDE_OR_INCLUDE', details);
+                        rowDetails = this.row('EXCLUDE_OR_INCLUDE', details);
 
                         results.push(rowDefaults.concat(rowDetails));
                     }
 
                     if (filter.type === 'UPPERCASE' || filter.type === 'LOWERCASE') {
                         details = filter.uppercaseDetails || filter.lowercaseDetails;
-                        rowDetails = this.createFilterRow('UPPERCASE_OR_LOWERCASE', details);
+                        rowDetails = this.row('UPPERCASE_OR_LOWERCASE', details);
 
                         results.push(rowDefaults.concat(rowDetails));
                     }
 
                     if (filter.type === 'SEARCH_AND_REPLACE') {
                         details = filter.searchAndReplaceDetails;
-                        rowDetails = this.createFilterRow('SEARCH_AND_REPLACE', details);
+                        rowDetails = this.row('SEARCH_AND_REPLACE', details);
 
                         results.push(rowDefaults.concat(rowDetails));
                     }
 
                     if (filter.type === 'ADVANCED') {
                         details = filter.advancedDetails;
-                        rowDetails = this.createFilterRow('ADVANCED', details);
+                        rowDetails = this.row('ADVANCED', details);
 
                         results.push(rowDefaults.concat(rowDetails));
                     }
                 }, this);
             });
-        }, this);
 
-        cb(results);
-    },
-
-    wrapperGetGoalData: function (account, property, profile, cb) {
-        var goalsList = Analytics.Management.Goals.list(account, property, profile).getItems();
-
-        validateCallback(cb);
-
-        return cb.call(this, goalsList);
-    },
-
-    getGoalData: function (cb) {
-        var details, rowDetails;
-        var results = [];
-
-        this.selectedAccounts.forEach(function (account) {
-            account.webProperties.forEach(function (property) {
-                property.profiles.forEach(function (profile) {
-                    this.wrapperGetGoalData(account.id, property.id, profile.id, function (goalsList) {
-                        goalsList.forEach(function (goal) {
-                            var rowDefaults = [
-                                account.name,
-                                account.id,
-                                property.name,
-                                property.id,
-                                profile.name,
-                                profile.id,
-                                goal.name,
-                                goal.id,
-                                goal.type,
-                                goal.active,
-                                goal.value
-                            ];
-                            if (goal.urlDestinationDetails) {
-                                details = goal.urlDestinationDetails;
-                                rowDetails = this.createGoalRow('urlDestinationDetails', details);
-
-                                results.push(rowDefaults.concat(rowDetails));
-                            }
-
-                            if (goal.visitTimeOnSiteDetails || goal.visitNumPagesDetails) {
-                                details = goal.visitTimeOnSiteDetails || goal.visitNumPagesDetails;
-                                rowDetails = this.createGoalRow('visitTimeOnSiteDetails_OR_visitNumPagesDetails', details);
-
-                                results.push(rowDefaults.concat(rowDetails));
-                            }
-
-                            if (goal.eventDetails) {
-                                details = goal.eventDetails;
-                                rowDetails = this.createGoalRow('eventDetails', details);
-
-                                results.push(rowDefaults.concat(rowDetails));
-                            }
-
-                        }, this);
-                    });
-                }, this);
-            }, this);
-        }, this);
-        cb(results);
+            return cb.call(this, results);
+        }
     }
 };
 
@@ -673,39 +721,34 @@ function getReports() {
 
     return [{
         'name': 'Filters',
-        'id': 'getViewFilterData'
+        'id': 'filters'
     }, {
-        'name': 'View Settings',
-        'id': 'getViewData'
-    }, {
-        'name': 'Account Filters',
-        'id': 'getAccountFilterData'
+        'name': 'Settings',
+        'id': 'settings'
     }, {
         'name': 'Goals',
-        'id': 'getGoalData'
+        'id': 'goals'
     }];
 }
 
-function buildSheetWithData(sheetName, data) {
-    var sheet = new Sheet(sheetName, data);
+function generateReport(account, reportName) {
+    var report = api[reportName];
 
-    return sheet.build();
-}
-
-function doAuditOfAccount(account, reportGetter) {
-    Api.init(account);
-
-    Api[reportGetter](function (results) {
-        buildSheetWithData('Goals', results);
-    });
-
+    report.init({ account: account })
+        .getData(function (data) {
+            sheet.init({
+                'name': account.name + ': ' + report.name,
+                'header': report.header,
+                'data': data
+            })
+                .build();
+        });
 }
 
 function saveReportDataFromSidebar(data) {
     var parsed = JSON.parse(data);
 
-    Logger.log(parsed.report);
-    //return doAuditOfAccount(parsed.data, parsed.report);
+    return generateReport(parsed.ids, parsed.report);
 }
 
 function getAccountSummary() {

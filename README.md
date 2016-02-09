@@ -7,6 +7,10 @@ This will become a public Add-on for Google Spreadsheets. It is a Google Apps Sc
  - provide color schema for different goal types (green = event funnel)
  - include all 20 goal steps?
  - review [UI Style Guide for Add-ons](https://developers.google.com/apps-script/add-ons/style)
- - better naming for header rows
+ - better naming for header rows; remove account name/id from header row
+ - remove wrappers?
+ - figure out better way to generate reports
+ - add additional reports?
+
 
 
