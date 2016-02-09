@@ -320,6 +320,7 @@ Sheet.prototype = {
  */
 
 var Api = {
+
     init: function (account) {
         this.selectedAccounts = account;
     },
@@ -668,16 +669,6 @@ function showSidebar() {
     return SpreadsheetApp.getUi().showSidebar(ui);
 }
 
-function getAccounts() {
-    var items = Analytics.Management.AccountSummaries.list().getItems();
-
-    if (!items) {
-        return [];
-    }
-
-    return items;
-}
-
 function getReports() {
 
     return [{
@@ -710,12 +701,19 @@ function doAuditOfAccount(account, reportGetter) {
 
 }
 
-function saveReportDataFromSidebar(selectedAccountAndReport) {
-    var allAccounts = getAccounts();
+function saveReportDataFromSidebar(data) {
+    var parsed = JSON.parse(data);
 
-    var reportGetter = selectedAccountAndReport[1].value;
+    Logger.log(parsed.report);
+    //return doAuditOfAccount(parsed.data, parsed.report);
+}
 
-    var account = allAccounts.filter(function (account) { return account.id === selectedAccountAndReport[0].value; });
+function getAccountSummary() {
+    var items = Analytics.Management.AccountSummaries.list().getItems();
 
-    return doAuditOfAccount(account, reportGetter);
+    if (!items) {
+        return [];
+    }
+
+    return JSON.stringify(items, ['name', 'id', 'webProperties', 'profiles']);
 }

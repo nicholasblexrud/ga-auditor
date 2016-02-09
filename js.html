@@ -1,12 +1,12 @@
 <script>
-/*globals google, accounts */
+/*globals google, accounts, Browser */
 
-function appendOptionsToSelect(array, selector) {
+function appendOptionsToSelect(array, selector, isAccounts) {
     var select = $(selector);
     select.empty();
 
     array.forEach(function (element, index) {
-        var setValue = element.id;
+        var setValue = isAccounts ? index : element.id;
         var option = $('<option>')
             .attr('value', setValue)
             .text(element.name);
@@ -16,10 +16,16 @@ function appendOptionsToSelect(array, selector) {
 
 var audit = {
 
-    submit: function () {
-        var data = $(this).closest('form').serializeArray();
+    submit: function (e) {
+        e.preventDefault();
+
+        var data = JSON.stringify({
+            ids: accounts[$('#account').val()],
+            report: $('#report').val()
+        });
+
         google.script.run
-            .withSuccessHandler(google.script.host.close)
+            .withSuccessHandler(this.close)
             .withFailureHandler(this.showError)
             .saveReportDataFromSidebar(data);
     },
@@ -35,10 +41,7 @@ var audit = {
 
     loadAccountsAndReports: function () {
 
-        google.script.run
-            .withSuccessHandler(this.showAccounts)
-            .withFailureHandler(this.showError)
-            .getAccounts();
+        this.showAccounts(accounts);
 
         google.script.run
             .withSuccessHandler(this.showReports)
@@ -48,7 +51,7 @@ var audit = {
     },
 
     showAccounts: function (accounts) {
-        appendOptionsToSelect(accounts, '#account');
+        appendOptionsToSelect(accounts, '#account', true);
     },
 
     showReports: function (reports) {
@@ -61,14 +64,11 @@ $(function () {
     // load Google Analytics accounts
     audit.loadAccountsAndReports();
 
-    // initialize multi-selects
-    $('select[multiple]').select2();
-
     // form - submit
-    $('#submit').on('click', audit.submit);
+    $('#submit').on('click', $.proxy(audit.submit, audit));
 
     // form - close
-    $('#close').on('click', audit.close);
+    $('#close').on('click', $.proxy(audit.close, audit));
 
 });
 </script>
