@@ -36,17 +36,16 @@ var audit = {
 
     showError: function (error) {
         console.log(error);
-        Browser.msgBox('An error has occured, please try again.');
+        window.alert('An error has occured, please try again.');
+        this.close();
+        
     },
 
-    loadAccountsAndReports: function () {
+    init: function () {
 
         this.showAccounts(accounts);
 
-        google.script.run
-            .withSuccessHandler(this.showReports)
-            .withFailureHandler(this.showError)
-            .getReports();
+        this.showReports(reports);
 
     },
 
@@ -62,7 +61,7 @@ var audit = {
 $(function () {
 
     // load Google Analytics accounts
-    audit.loadAccountsAndReports();
+    audit.init();
 
     // form - submit
     $('#submit').on('click', $.proxy(audit.submit, audit));

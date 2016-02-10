@@ -10,7 +10,9 @@ var colors = {
     blue: '#4d90fe',
     green: '#0fc357',
     purple: '#c27ba0',
-    yellow: '#e7fe2b'
+    yellow: '#e7fe2b',
+    grey: '#666666',
+    white: '#ffffff'
 };
 
 function headerValuesAndColors(array) {
@@ -55,28 +57,49 @@ var sheet = {
         return this;
     },
 
+    buildTitle: function (cb) {
+        var rowHeight = 35;
+        var titleRow = this.sheet.setRowHeight(1, rowHeight).getRange(1, 1, 1, this.headerLength);
+        var titleCell = this.sheet.getRange(1, 1);
+
+        titleRow
+            .setBackground(colors.grey)
+            .setFontColor(colors.white)
+            .setFontSize(12)
+            .setFontWeight('bold')
+            .setVerticalAlignment('middle')
+            .setHorizontalAlignment('left')
+            .mergeAcross();
+
+        titleCell
+            .setValue(this.name);
+
+        cb.call(this);
+    },
+
     buildHeader: function (cb) {
-        var headerRow = this.sheet.setRowHeight(1, 35).getRange(1, 1, 1, this.headerLength);
+        var rowHeight = 35;
+        var headerRow = this.sheet.setRowHeight(2, rowHeight).getRange(2, 1, 1, this.headerLength);
 
         // add style header row
         headerRow
             .setBackgrounds(this.header.colors)
-            .setFontColor('white')
+            .setFontColor(colors.white)
             .setFontSize(12)
             .setFontWeight('bold')
             .setVerticalAlignment('middle')
             .setValues(this.header.values);
 
         // freeze the header row
-        this.sheet.setFrozenRows(1);
+        this.sheet.setFrozenRows(2);
 
         cb.call(this);
 
     },
 
     buildData: function (cb) {
-        var dataRange = this.sheet.getRange(2, 1, this.data.length, this.headerLength);
-        var allData = this.sheet.getRange(2, 1, this.sheet.getMaxRows(), this.headerLength);
+        var dataRange = this.sheet.getRange(3, 1, this.data.length, this.headerLength);
+        var allData = this.sheet.getRange(3, 1, this.sheet.getMaxRows(), this.headerLength);
 
         // clear existing data
         if (!dataRange.isBlank()) {
@@ -97,9 +120,11 @@ var sheet = {
     },
 
     build: function () {
-        this.buildHeader(function () {
-            this.buildData(function () {
-                this.cleanup();
+        this.buildTitle(function () {
+            this.buildHeader(function () {
+                this.buildData(function () {
+                    this.cleanup();
+                });
             });
         });
     }
@@ -131,100 +156,98 @@ var api = {
             }, {
                 name: 'View Name'
             }, {
-                name: 'View Id'
-            }, {
                 name: 'Goal Name'
             }, {
                 name: 'Goal Id'
             }, {
-                name: 'Goal Type'
+                name: 'Type'
             }, {
-                name: 'Goal Active'
+                name: 'Active?'
             }, {
-                name: 'Goal Value'
+                name: 'Value'
             }, {
-                name: 'Goal Detail URL',
+                name: 'Goal URL',
                 color: colors.green
             }, {
-                name: 'Goal Detail CaseSensitive',
+                name: 'Goal CaseSensitive',
                 color: colors.green
             }, {
-                name: 'Goal Detail MatchType',
+                name: 'Match Type',
                 color: colors.green
             }, {
-                name: 'Goal Detail FirstStepRequired',
+                name: 'Required Step?',
                 color: colors.green
             }, {
-                name: 'Goal Detail Step 1',
+                name: 'Step 1',
                 color: colors.green
             }, {
-                name: 'Goal Detail Step 2',
+                name: 'Step 2',
                 color: colors.green
             }, {
-                name: 'Goal Detail Step 3',
+                name: 'Step 3',
                 color: colors.green
             }, {
-                name: 'Goal Detail Step 4',
+                name: 'Step 4',
                 color: colors.green
             }, {
-                name: 'Goal Detail Step 5',
+                name: 'Step 5',
                 color: colors.green
             }, {
-                name: 'Goal Detail Step 6',
+                name: 'Step 6',
                 color: colors.green
             }, {
-                name: 'Goal Detail Step 7',
+                name: 'Step 7',
                 color: colors.green
             }, {
-                name: 'Goal Detail Step 8',
+                name: 'Step 8',
                 color: colors.green
             }, {
-                name: 'Goal Detail Step 9',
+                name: 'Step 9',
                 color: colors.green
             }, {
-                name: 'Goal Detail Step 10',
+                name: 'Step 10',
                 color: colors.green
             }, {
-                name: 'Goal Detail ComparisonType',
+                name: 'ComparisonType',
                 color: colors.purple
             }, {
-                name: 'Goal Detail ComparisonValue',
+                name: 'ComparisonValue',
                 color: colors.purple
             }, {
-                name: 'Goal Event Condition Type',
+                name: 'Event Category type',
                 color: colors.yellow
             }, {
-                name: 'Goal Event Condition MatchType',
+                name: 'Event Category condition',
                 color: colors.yellow
             }, {
-                name: 'Goal Event Condition Expression',
+                name: 'Event Category value',
                 color: colors.yellow
             }, {
-                name: 'Goal Event Condition Type',
+                name: 'Event Action type',
                 color: colors.yellow
             }, {
-                name: 'Goal Event Condition MatchType',
+                name: 'Event Action condition',
                 color: colors.yellow
             }, {
-                name: 'Goal Event Condition Expression',
+                name: 'Event Action value',
                 color: colors.yellow
             }, {
-                name: 'Goal Event Condition Type',
+                name: 'Event Label type',
                 color: colors.yellow
             }, {
-                name: 'Goal Event Condition MatchType',
+                name: 'Event Label condition',
                 color: colors.yellow
             }, {
-                name: 'Goal Event Condition Expression',
+                name: 'Event Label value',
                 color: colors.yellow
             }, {
-                name: 'Goal Event Condition Type',
+                name: 'Event Value type',
                 color: colors.yellow
             }, {
-                name: 'Goal Event Condition ComparisonType',
+                name: 'Event Value condition',
                 color: colors.yellow
             }, {
-                name: 'Goal Event Condition ComparisonValue',
+                name: 'Event Value value',
                 color: colors.yellow
             }];
 
@@ -333,7 +356,6 @@ var api = {
                                 property.name,
                                 property.id,
                                 profile.name,
-                                profile.id,
                                 goal.name,
                                 goal.id,
                                 goal.type,
@@ -387,25 +409,23 @@ var api = {
             }, {
                 name: 'View Name'
             }, {
-                name: 'View Id'
+                name: 'Website URL'
             }, {
-                name: 'View Website URL'
+                name: 'Time zone '
             }, {
-                name: 'View Timezone'
+                name: 'Default Page'
             }, {
-                name: 'View Default Page'
+                name: 'Exclude Query Parameters'
             }, {
-                name: 'View Exclude Query Parameters'
+                name: 'Currency'
             }, {
-                name: 'View Currency'
+                name: 'Site Search Query Parameters'
             }, {
-                name: 'View Site Search Query Parameters'
+                name: 'Strip Site Search Query Parameters'
             }, {
-                name: 'View Strip Site Search Query Parameters'
+                name: 'Site Search Category Parameters',
             }, {
-                name: 'View Site Search Category Parameters',
-            }, {
-                name: 'View Strip Site Search Category Parameters'
+                name: 'Strip Site Search Category Parameters'
             }];
 
             return headerValuesAndColors(data);
@@ -427,7 +447,6 @@ var api = {
                             property.name,
                             property.id,
                             profile.name,
-                            profile.id,
                             profile.websiteUrl,
                             profile.timezone,
                             profile.defaultPage,
@@ -463,12 +482,8 @@ var api = {
                 name: 'Property Id'
             }, {
                 name: 'View Name'
-            }, {
-                name: 'View Id'
-            }, {
+            },  {
                 name: 'Filter Name'
-            }, {
-                name: 'Filter Id'
             }, {
                 name: 'Filter Type'
             }, {
@@ -556,28 +571,28 @@ var api = {
 
                     //TODO: adjust column header
                     links.forEach(function (link) {
-                        var linkFilterId = link[5];
+                        var linkFilterId = link[4];
 
                         lists.forEach(function (list) {
-                            var listFilterId = list[1];
+                            var listFilterId = list[0];
                             if (linkFilterId === listFilterId) {
-                                link[6] = list[2];
-                                link[7] = list[3];
-                                link[8] = list[4];
-                                link[9] = list[5];
-                                link[10] = list[6];
-                                link[11] = list[7];
-                                link[12] = list[8];
-                                link[13] = list[9];
-                                link[14] = list[10];
-                                link[15] = list[11];
-                                link[16] = list[12];
-                                link[17] = list[13];
-                                link[18] = list[14];
-                                link[19] = list[15];
-                                link[20] = list[16];
-                                link[21] = list[17];
-                                link[22] = list[18];
+                                link[4] = list[1];
+                                link[5] = list[2];
+                                link[6] = list[3];
+                                link[7] = list[4];
+                                link[8] = list[5];
+                                link[9] = list[6];
+                                link[10] = list[7];
+                                link[11] = list[8];
+                                link[12] = list[9];
+                                link[13] = list[10];
+                                link[14] = list[11];
+                                link[15] = list[12];
+                                link[16] = list[13];
+                                link[17] = list[14];
+                                link[18] = list[15];
+                                link[19] = list[16];
+                                link[20] = list[17];
                             }
                         });
                     });
@@ -614,7 +629,6 @@ var api = {
                                 property.name,
                                 property.id,
                                 profile.name,
-                                profile.id,
                                 filter.filterRef.name,
                                 filter.filterRef.id
                             ]);
@@ -633,7 +647,6 @@ var api = {
             this.wrapperLists(this.account.id, function (list) {
                 list.forEach(function (filter) {
                     rowDefaults = [
-                        filter.name,
                         filter.id,
                         filter.type
                     ];
@@ -699,7 +712,7 @@ function showSidebar() {
 
 function getReports() {
 
-    return [{
+    return JSON.stringify([{
         'name': 'Filters',
         'id': 'filters'
     }, {
@@ -708,7 +721,7 @@ function getReports() {
     }, {
         'name': 'Goals',
         'id': 'goals'
-    }];
+    }]);
 }
 
 function generateReport(account, reportName) {
