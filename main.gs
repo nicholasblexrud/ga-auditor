@@ -125,10 +125,6 @@ var api = {
         name: 'Goals',
         getHeader: function () {
             var data = [{
-                name: 'Account Name'
-            }, {
-                name: 'Account Id'
-            }, {
                 name: 'Property Name'
             }, {
                 name: 'Property Id'
@@ -235,7 +231,7 @@ var api = {
             return headerValuesAndColors(data);
         },
         row: function (type, details) {
-            var len = 28;
+            var len = 26;
             var arr = Array.call(null, len);
             var goalDetailStep = [];
             var conditionDetail = [];
@@ -334,8 +330,6 @@ var api = {
                     this.wrapper(this.account.id, property.id, profile.id, function (goalsList) {
                         goalsList.forEach(function (goal) {
                             var rowDefaults = [
-                                this.account.name,
-                                this.account.id,
                                 property.name,
                                 property.id,
                                 profile.name,
@@ -387,10 +381,6 @@ var api = {
         name: 'Settings',
         getHeader: function () {
             var data = [{
-                name: 'Account Name'
-            }, {
-                name: 'Account Id'
-            }, {
                 name: 'Property Name'
             }, {
                 name: 'Property Id'
@@ -434,8 +424,6 @@ var api = {
                 this.wrapper(this.account.id, property.id, function (profilesList) {
                     profilesList.forEach(function (profile) {
                         results.push([
-                            this.account.name,
-                            this.account.id,
                             property.name,
                             property.id,
                             profile.name,
@@ -470,10 +458,6 @@ var api = {
         name: 'Filters',
         getHeader: function () {
             var data = [{
-                name: 'Account Name'
-            }, {
-                name: 'Account Id'
-            }, {
                 name: 'Property Name'
             }, {
                 name: 'Property Id'
@@ -524,7 +508,7 @@ var api = {
             return headerValuesAndColors(data);
         },
         row: function (type, details) {
-            var len = 16;
+            var len = 14;
             var arr = Array.call(null, len);
 
             switch (type) {
@@ -572,11 +556,13 @@ var api = {
 
                     //TODO: adjust column header
                     links.forEach(function (link) {
-                        var linkFilterId = link[7];
+                        var linkFilterId = link[5];
 
                         lists.forEach(function (list) {
-                            var listFilterId = list[3];
+                            var listFilterId = list[1];
                             if (linkFilterId === listFilterId) {
+                                link[6] = list[2];
+                                link[7] = list[3];
                                 link[8] = list[4];
                                 link[9] = list[5];
                                 link[10] = list[6];
@@ -592,8 +578,6 @@ var api = {
                                 link[20] = list[16];
                                 link[21] = list[17];
                                 link[22] = list[18];
-                                link[23] = list[19];
-                                link[24] = list[20];
                             }
                         });
                     });
@@ -627,8 +611,6 @@ var api = {
                     this.wrapperLinks(this.account.id, property.id, profile.id, function (links) {
                         links.forEach(function (filter) {
                             results.push([
-                                this.account.name,
-                                this.account.id,
                                 property.name,
                                 property.id,
                                 profile.name,
@@ -651,8 +633,6 @@ var api = {
             this.wrapperLists(this.account.id, function (list) {
                 list.forEach(function (filter) {
                     rowDefaults = [
-                        this.account.name,
-                        this.account.id,
                         filter.name,
                         filter.id,
                         filter.type
