@@ -254,7 +254,7 @@ var api = {
             return headerValuesAndColors(data);
         },
         row: function (type, details) {
-            var len = 26;
+            var len = 28;
             var arr = Array.call(null, len);
             var goalDetailStep = [];
             var conditionDetail = [];
@@ -301,18 +301,27 @@ var api = {
 
                 if (conditions) {
                     conditions.forEach(function (condition) {
-                        if (condition.type === 'VALUE') {
-                            conditionDetail.push(
-                                condition.type,
-                                condition.comparisonType,
-                                condition.comparisonValue
-                            );
-                        } else {
-                            conditionDetail.push(
-                                condition.type,
-                                condition.matchType,
-                                condition.expression
-                            );
+
+                        if (condition.type === 'CATEGORY') {
+                            conditionDetail[0] = condition.type;
+                            conditionDetail[1] = condition.matchType;
+                            conditionDetail[2] = condition.expression;
+
+                        } else if (condition.type === 'ACTION') {
+                            conditionDetail[3] = condition.type;
+                            conditionDetail[4] = condition.matchType;
+                            conditionDetail[5] = condition.expression;
+
+                        } else if (condition.type === 'LABEL') {
+                            conditionDetail[6] = condition.type;
+                            conditionDetail[7] = condition.matchType;
+                            conditionDetail[8] = condition.expression;
+
+                        } else if (condition.type === 'VALUE') {
+                            conditionDetail[9] = condition.type;
+                            conditionDetail[10] = condition.comparisonType;
+                            conditionDetail[11] = condition.comparisonValue;
+
                         }
                     });
                 }

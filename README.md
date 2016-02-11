@@ -5,9 +5,9 @@ This will become a public Add-on for Google Spreadsheets. It is a Google Apps Sc
  - add all 20 goal steps?
  - add additional reports?
  - add a vertical freeze
+ - split goals (time spent on page & # of pages viewed)
 
- **Bugs**
- - look into goal events (action in category column)
+**Bugs**
  - add spinner on sidebar for waiting
  - get value of 'undefined' in reports... it's not undefined
 
