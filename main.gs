@@ -12,7 +12,8 @@ var colors = {
     purple: '#c27ba0',
     yellow: '#e7fe2b',
     grey: '#666666',
-    white: '#ffffff'
+    white: '#ffffff',
+    red: '#e06666'
 };
 
 function headerValuesAndColors(array) {
@@ -208,22 +209,10 @@ var api = {
                 name: 'Step 10',
                 color: colors.green
             }, {
-                name: 'ComparisonType',
-                color: colors.purple
-            }, {
-                name: 'ComparisonValue',
-                color: colors.purple
-            }, {
-                name: 'Event Category type',
-                color: colors.yellow
-            }, {
                 name: 'Event Category condition',
                 color: colors.yellow
             }, {
                 name: 'Event Category value',
-                color: colors.yellow
-            }, {
-                name: 'Event Action type',
                 color: colors.yellow
             }, {
                 name: 'Event Action condition',
@@ -232,16 +221,10 @@ var api = {
                 name: 'Event Action value',
                 color: colors.yellow
             }, {
-                name: 'Event Label type',
-                color: colors.yellow
-            }, {
                 name: 'Event Label condition',
                 color: colors.yellow
             }, {
                 name: 'Event Label value',
-                color: colors.yellow
-            }, {
-                name: 'Event Value type',
                 color: colors.yellow
             }, {
                 name: 'Event Value condition',
@@ -249,15 +232,26 @@ var api = {
             }, {
                 name: 'Event Value value',
                 color: colors.yellow
+            }, {
+                name: 'Time on Site',
+                color: colors.red
+            }, {
+                name: 'Time on Site value',
+                color: colors.red
+            }, {
+                name: 'Pages per visit',
+                color: colors.purple
+            }, {
+                name: 'Number of pages',
+                color: colors.purple
             }];
 
             return headerValuesAndColors(data);
         },
         row: function (type, details) {
-            var len = 28;
+            var len = 26;
             var arr = Array.call(null, len);
             var goalDetailStep = [];
-            var conditionDetail = [];
             var steps, conditions;
 
             switch (type) {
@@ -287,13 +281,6 @@ var api = {
                 arr[13] = goalDetailStep[9];
 
                 goalDetailStep = [];
-
-                break;
-
-            case 'visitTimeOnSiteDetails_OR_visitNumPagesDetails':
-                arr[14] = details.comparisonType;
-                arr[15] = details.comparisonValue;
-
                 break;
 
             case 'eventDetails':
@@ -303,44 +290,34 @@ var api = {
                     conditions.forEach(function (condition) {
 
                         if (condition.type === 'CATEGORY') {
-                            conditionDetail[0] = condition.type;
-                            conditionDetail[1] = condition.matchType;
-                            conditionDetail[2] = condition.expression;
+                            arr[14] = condition.matchType;
+                            arr[15] = condition.expression;
 
                         } else if (condition.type === 'ACTION') {
-                            conditionDetail[3] = condition.type;
-                            conditionDetail[4] = condition.matchType;
-                            conditionDetail[5] = condition.expression;
+                            arr[16] = condition.matchType;
+                            arr[17] = condition.expression;
 
                         } else if (condition.type === 'LABEL') {
-                            conditionDetail[6] = condition.type;
-                            conditionDetail[7] = condition.matchType;
-                            conditionDetail[8] = condition.expression;
+                            arr[18] = condition.matchType;
+                            arr[19] = condition.expression;
 
                         } else if (condition.type === 'VALUE') {
-                            conditionDetail[9] = condition.type;
-                            conditionDetail[10] = condition.comparisonType;
-                            conditionDetail[11] = condition.comparisonValue;
+                            arr[20] = condition.comparisonType;
+                            arr[21] = condition.comparisonValue;
 
                         }
                     });
                 }
+                break;
 
-                arr[16] = conditionDetail[0];
-                arr[17] = conditionDetail[1];
-                arr[18] = conditionDetail[2];
-                arr[19] = conditionDetail[3];
-                arr[20] = conditionDetail[4];
-                arr[21] = conditionDetail[5];
-                arr[22] = conditionDetail[6];
-                arr[23] = conditionDetail[7];
-                arr[24] = conditionDetail[8];
-                arr[25] = conditionDetail[9];
-                arr[26] = conditionDetail[10];
-                arr[27] = conditionDetail[11];
+            case 'visitTimeOnSiteDetails':
+                arr[22] = details.comparisonType;
+                arr[23] = details.comparisonValue;
+                break;
 
-                conditionDetail = [];
-
+            case 'visitNumPagesDetails':
+                arr[24] = details.comparisonType;
+                arr[25] = details.comparisonValue;
                 break;
             }
 
