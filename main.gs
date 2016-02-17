@@ -34,6 +34,12 @@ function replaceSparseInArrayWithDefault(array, defaultValue, length) {
     return array;
 }
 
+function replaceUndefinedInArrayWithDefault(array, defaultValue) {
+    return array.map(function (el) {
+        return el === undefined ? defaultValue : el;
+    });
+}
+
 function validateCallback(callback) {
     if (typeof callback !== 'function') {
         throw new Error('Callback must be a function');
@@ -233,7 +239,7 @@ var api = {
                 name: 'Event Value value',
                 color: colors.yellow
             }, {
-                name: 'Time on Site',
+                name: 'Time on Site (in seconds)',
                 color: colors.red
             }, {
                 name: 'Time on Site value',
@@ -264,6 +270,8 @@ var api = {
                         goalDetailStep.push(step.url);
                     });
                 }
+
+                goalDetailStep = replaceSparseInArrayWithDefault(goalDetailStep, '-', 10);
 
                 arr[0] = details.url;
                 arr[1] = details.caseSensitive;
@@ -331,7 +339,7 @@ var api = {
             return cb.call(this, goalsList);
         },
         getData: function (cb) {
-            var details, rowDetails;
+            var rowDetails;
             var results = [];
 
             this.account.webProperties.forEach(function (property) {
@@ -348,26 +356,24 @@ var api = {
                                 goal.active,
                                 goal.value
                             ];
-                            if (goal.urlDestinationDetails) {
-                                details = goal.urlDestinationDetails;
-                                rowDetails = this.row('urlDestinationDetails', details);
 
-                                results.push(rowDefaults.concat(rowDetails));
+                            if (goal.urlDestinationDetails) {
+                                rowDetails = this.row('urlDestinationDetails', goal.urlDestinationDetails);
                             }
 
-                            if (goal.visitTimeOnSiteDetails || goal.visitNumPagesDetails) {
-                                details = goal.visitTimeOnSiteDetails || goal.visitNumPagesDetails;
-                                rowDetails = this.row('visitTimeOnSiteDetails_OR_visitNumPagesDetails', details);
+                            if (goal.visitTimeOnSiteDetails) {
+                                rowDetails = this.row('visitTimeOnSiteDetails', goal.visitTimeOnSiteDetails);
+                            }
 
-                                results.push(rowDefaults.concat(rowDetails));
+                            if (goal.visitNumPagesDetails) {
+                                rowDetails = this.row('visitNumPagesDetails', goal.visitNumPagesDetails);
                             }
 
                             if (goal.eventDetails) {
-                                details = goal.eventDetails;
-                                rowDetails = this.row('eventDetails', details);
-
-                                results.push(rowDefaults.concat(rowDetails));
+                                rowDetails = this.row('eventDetails', goal.eventDetails);
                             }
+
+                            results.push(rowDefaults.concat(rowDetails));
 
                         }, this);
                     });
@@ -405,13 +411,25 @@ var api = {
             }, {
                 name: 'Currency'
             }, {
-                name: 'Site Search Query Parameters'
+                name: 'Bot Filtering?'
             }, {
-                name: 'Strip Site Search Query Parameters'
+                name: 'Site Search Query Parameters',
+                color: colors.green
+            }, {
+                name: 'Strip Site Search Query Parameters',
+                color: colors.green
             }, {
                 name: 'Site Search Category Parameters',
+                color: colors.green
             }, {
-                name: 'Strip Site Search Category Parameters'
+                name: 'Strip Site Search Category Parameters',
+                color: colors.green
+            }, {
+                name: 'Ecommerce Tracking?',
+                color: colors.yellow
+            }, {
+                name: 'Enhanced Ecommerce Tracking?',
+                color: colors.yellow
             }];
 
             return headerValuesAndColors(data);
@@ -429,7 +447,7 @@ var api = {
             this.account.webProperties.forEach(function (property) {
                 this.wrapper(this.account.id, property.id, function (profilesList) {
                     profilesList.forEach(function (profile) {
-                        results.push([
+                        var rowDefaults = [
                             property.name,
                             property.id,
                             profile.name,
@@ -438,11 +456,18 @@ var api = {
                             profile.defaultPage,
                             profile.excludeQueryParameters,
                             profile.currency,
+                            profile.botFilteringEnabled,
                             profile.siteSearchQueryParameters,
                             profile.stripSiteSearchQueryParameters,
                             profile.siteSearchCategoryParameters,
-                            profile.stripSiteSearchCategoryParameters
-                        ]);
+                            profile.stripSiteSearchCategoryParameters,
+                            profile.eCommerceTracking,
+                            profile.enhancedECommerceTracking
+                        ];
+
+                        rowDefaults = replaceUndefinedInArrayWithDefault(rowDefaults, '-');
+
+                        results.push(rowDefaults);
                     }, this);
                 });
             }, this);
@@ -475,50 +500,61 @@ var api = {
             }, {
                 name: 'Filter Field'
             }, {
-                name: 'Filter MatchType'
+                name: 'Filter Case Sensitive?'
             }, {
-                name: 'Filter ExpressionValue'
+                name: 'Match Type',
+                color: colors.green
             }, {
-                name: 'Filter CaseSensitive'
+                name: 'Expression Value',
+                color: colors.green
             }, {
-                name: 'Filter SearchString'
+                name: 'Search Value',
+                color: colors.yellow
             }, {
-                name: 'Filter ReplaceString'
+                name: 'Replace Value',
+                color: colors.yellow
             }, {
-                name: 'Filter FieldA'
+                name: 'Field A',
+                color: colors.red
             }, {
-                name: 'Filter ExtractA'
+                name: 'Extract A Pattern',
+                color: colors.red
             }, {
-                name: 'Filter FieldB'
+                name: 'Field B',
+                color: colors.red
             }, {
-                name: 'Filter ExtractB'
+                name: 'Extract B Pattern',
+                color: colors.red
             }, {
-                name: 'Filter OutputToField'
+                name: 'Output to Field',
+                color: colors.red
             }, {
-                name: 'Filter OutputConstructor'
+                name: 'Output to Constructor',
+                color: colors.red
             }, {
-                name: 'Filter FieldARequired'
+                name: 'Field A Required?',
+                color: colors.red
             }, {
-                name: 'Filter FieldBRequired'
+                name: 'Field B Required?',
+                color: colors.red
             }, {
-                name: 'Filter OverrideOutputField'
-            }, {
-                name: 'Filter CaseSensitive'
+                name: 'Override Output Field?',
+                color: colors.red
             }];
 
             return headerValuesAndColors(data);
         },
         row: function (type, details) {
-            var len = 14;
+            var len = 15;
             var arr = Array.call(null, len);
 
             switch (type) {
 
             case 'EXCLUDE_OR_INCLUDE':
                 arr[0] = details.field;
-                arr[1] = details.matchType;
-                arr[2] = details.expressionValue;
-                arr[3] = details.caseSensitive;
+                arr[1] = details.caseSensitive;
+                arr[2] = details.matchType;
+                arr[3] = details.expressionValue;
                 break;
 
             case 'UPPERCASE_OR_LOWERCASE':
@@ -527,13 +563,13 @@ var api = {
 
             case 'SEARCH_AND_REPLACE':
                 arr[0] = details.field;
-                arr[3] = details.searchString;
-                arr[4] = details.replaceString;
-                arr[5] = details.caseSensitive;
+                arr[1] = details.caseSensitive;
+                arr[4] = details.searchString;
+                arr[5] = details.replaceString;
                 break;
 
             case 'ADVANCED':
-                arr[0] = details.field;
+                arr[1] = details.caseSensitive;
                 arr[6] = details.fieldA;
                 arr[7] = details.extractA;
                 arr[8] = details.fieldB;
@@ -543,7 +579,6 @@ var api = {
                 arr[12] = details.fieldARequired;
                 arr[13] = details.fieldBRequired;
                 arr[14] = details.overrideOutputField;
-                arr[15] = details.caseSensitive;
                 break;
 
             }
@@ -578,7 +613,6 @@ var api = {
                                 link[17] = list[14];
                                 link[18] = list[15];
                                 link[19] = list[16];
-                                link[20] = list[17];
                             }
                         });
                     });
@@ -640,30 +674,23 @@ var api = {
                     if (filter.type === 'EXCLUDE' || filter.type === 'INCLUDE') {
                         details = filter.getIncludeDetails() || filter.getExcludeDetails();
                         rowDetails = this.row('EXCLUDE_OR_INCLUDE', details);
-
-                        results.push(rowDefaults.concat(rowDetails));
                     }
 
                     if (filter.type === 'UPPERCASE' || filter.type === 'LOWERCASE') {
                         details = filter.uppercaseDetails || filter.lowercaseDetails;
                         rowDetails = this.row('UPPERCASE_OR_LOWERCASE', details);
-
-                        results.push(rowDefaults.concat(rowDetails));
                     }
 
                     if (filter.type === 'SEARCH_AND_REPLACE') {
-                        details = filter.searchAndReplaceDetails;
-                        rowDetails = this.row('SEARCH_AND_REPLACE', details);
-
-                        results.push(rowDefaults.concat(rowDetails));
+                        rowDetails = this.row('SEARCH_AND_REPLACE', filter.searchAndReplaceDetails);
                     }
 
                     if (filter.type === 'ADVANCED') {
-                        details = filter.advancedDetails;
-                        rowDetails = this.row('ADVANCED', details);
-
-                        results.push(rowDefaults.concat(rowDetails));
+                        rowDetails = this.row('ADVANCED', filter.advancedDetails);
                     }
+
+                    results.push(rowDefaults.concat(rowDetails));
+
                 }, this);
             });
 
