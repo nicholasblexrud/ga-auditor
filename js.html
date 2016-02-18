@@ -1,12 +1,14 @@
 <script>
-/*globals google, accounts, Browser */
+/*globals google, accounts, Browser, reports */
 
-function appendOptionsToSelect(array, selector, isAccounts) {
+var flag = false;
+
+function appendOptionsToSelect(array, selector) {
     var select = $(selector);
     select.empty();
 
     array.forEach(function (element, index) {
-        var setValue = isAccounts ? index : element.id;
+        var setValue = selector === '#account' ? index : element.id;
         var option = $('<option>')
             .attr('value', setValue)
             .text(element.name);
@@ -15,14 +17,13 @@ function appendOptionsToSelect(array, selector, isAccounts) {
 }
 
 var audit = {
-
     submit: function (e) {
-        e.preventDefault();
-
         var data = JSON.stringify({
             ids: accounts[$('#account').val()],
             report: $('#report').val()
         });
+
+        e.preventDefault();
 
         google.script.run
             .withSuccessHandler(this.close)
@@ -36,9 +37,22 @@ var audit = {
 
     showError: function (error) {
         console.log(error);
+        if (error && error.message && error.message === 'Quota Error: User Rate Limit Exceeded.') {
+            if (!flag) {
+                flag = true;
+                window.alert('It looks like you\'ve you hit the user rate limit. ' + 
+                    'We\'ll continue to ask for the data, but feel free to cancel ' + 
+                    'the request and try again later.');
+            }
+            return setTimeout(function () {
+                $('#submit').trigger('click');
+            }, 1000);
+        }
+
+        console.log(error);
         window.alert('An error has occured, please try again.');
         this.close();
-        
+
     },
 
     init: function () {
@@ -50,7 +64,7 @@ var audit = {
     },
 
     showAccounts: function (accounts) {
-        appendOptionsToSelect(accounts, '#account', true);
+        appendOptionsToSelect(accounts, '#account');
     },
 
     showReports: function (reports) {

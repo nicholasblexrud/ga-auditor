@@ -40,12 +40,6 @@ function replaceUndefinedInArrayWithDefault(array, defaultValue) {
     });
 }
 
-function validateCallback(callback) {
-    if (typeof callback !== 'function') {
-        throw new Error('Callback must be a function');
-    }
-}
-
 /*
  *
  * SHEET
@@ -176,7 +170,7 @@ var api = {
                 name: 'Goal URL',
                 color: colors.green
             }, {
-                name: 'Goal CaseSensitive',
+                name: 'Goal Case Sensitive?',
                 color: colors.green
             }, {
                 name: 'Match Type',
@@ -333,9 +327,6 @@ var api = {
         },
         wrapper: function (account, property, profile, cb) {
             var goalsList = Analytics.Management.Goals.list(account, property, profile).getItems();
-
-            validateCallback(cb);
-
             return cb.call(this, goalsList);
         },
         getData: function (cb) {
@@ -436,9 +427,6 @@ var api = {
         },
         wrapper: function (account, property, cb) {
             var viewsList = Analytics.Management.Profiles.list(account, property).getItems();
-
-            validateCallback(cb);
-
             return cb.call(this, viewsList);
         },
         getData: function (cb) {
@@ -590,7 +578,6 @@ var api = {
             this.links(function (links) {
                 this.lists(function (lists) {
 
-                    //TODO: adjust column header
                     links.forEach(function (link) {
                         var linkFilterId = link[4];
 
@@ -624,17 +611,11 @@ var api = {
 
         wrapperLinks: function (account, property, profile, cb) {
             var links = Analytics.Management.ProfileFilterLinks.list(account, property, profile).getItems();
-
-            validateCallback(cb);
-
             return cb.call(this, links);
         },
 
         wrapperLists: function (account, cb) {
             var list = Analytics.Management.Filters.list(account).getItems();
-
-            validateCallback(cb);
-
             return cb.call(this, list);
         },
 
@@ -709,7 +690,7 @@ function onOpen(e) {
     return SpreadsheetApp
         .getUi()
         .createAddonMenu()
-        .addItem('Get Accounts', 'showSidebar')
+        .addItem('Create Report', 'showSidebar')
         .addToUi();
 }
 
@@ -717,7 +698,7 @@ function showSidebar() {
     var ui = HtmlService
         .createTemplateFromFile('index')
         .evaluate()
-        .setTitle('Auditor')
+        .setTitle('GA Auditor')
         .setSandboxMode(HtmlService.SandboxMode.IFRAME);
 
     return SpreadsheetApp.getUi().showSidebar(ui);
@@ -740,14 +721,20 @@ function getReports() {
 function generateReport(account, reportName) {
     var report = api[reportName];
 
-    report.init({ account: account })
+    report
+        .init({ account: account })
         .getData(function (data) {
+            var data1 = [[]];
+
+            if (!data1[0].length) {
+                throw new Error('no data to be found');
+            }
+
             sheet.init({
                 'name': account.name + ': ' + report.name,
                 'header': report.header,
                 'data': data
-            })
-                .build();
+            }).build();
         });
 }
 

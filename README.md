@@ -6,13 +6,15 @@ This will become a public Add-on for Google Spreadsheets. It is a Google Apps Sc
 
 **Bugs**
  - add spinner on sidebar for waiting
- - if there is an error, it shouldn't create the sheet (throw an error in goals header)
- - remove e.preventDefault()
+
+ **Todo**
+ - review exceptions
 
 **Prior to launch**
- - document code
+ - document code (JSDoc)
  - review [UI Style Guide for Add-ons](https://developers.google.com/apps-script/add-ons/style)
- - add try/catches in all api calls 
+ - add GA tracking
+
 
 **Add to docs**
  - add all 20 goal steps?
