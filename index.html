@@ -6,7 +6,8 @@
     <?!= HtmlService.createHtmlOutputFromFile('css').getContent(); ?>
 </head>
 <body>
-    <form class="sidebar" id="new-audit-data" name="new-audit-data">
+    <div class="spinner"></div>
+    <form class="sidebar" name="sidebar">
 
         <section>
             <script> var accounts =<?!= getAccountSummary() ?>;</script>

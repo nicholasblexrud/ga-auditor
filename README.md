@@ -4,15 +4,13 @@ This will become a public Add-on for Google Spreadsheets. It is a Google Apps Sc
 **Feature Requests**
  - add additional reports
 
-**Bugs**
- - add spinner on sidebar for waiting
-
- **Todo**
+**Todo**
  - review exceptions
 
 **Prior to launch**
  - document code (JSDoc)
  - review [UI Style Guide for Add-ons](https://developers.google.com/apps-script/add-ons/style)
+   - add onInstall dialog
  - add GA tracking
 
 

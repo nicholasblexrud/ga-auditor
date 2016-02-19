@@ -16,6 +16,11 @@ var colors = {
     red: '#e06666'
 };
 
+function UserException(message) {
+    this.messsage = message;
+    this.name = 'UserException';
+}
+
 function headerValuesAndColors(array) {
     return {
         values: [array.map(function (element) { return element.name; })],
@@ -727,7 +732,7 @@ function generateReport(account, reportName) {
             var data1 = [[]];
 
             if (!data1[0].length) {
-                throw new Error('no data to be found');
+                throw new Error('No data for ' + reportName + ' found in the ' + account.name + ' account. Please try another account or report.');
             }
 
             sheet.init({

@@ -1,14 +1,27 @@
 <script>
 /*globals google, accounts, Browser, reports */
 
-var flag = false;
+function UserException(message) {
+    this.messsage = message;
+    this.name = 'UserException';
+}
 
 function appendOptionsToSelect(array, selector) {
     var select = $(selector);
+    var isAccount = selector === '#account';
     select.empty();
 
+    if (!array.length) {
+
+        if (isAccount) {
+            throw new UserException('We couldn\'t find any accounts. Please log in with another account.');
+        }
+
+        throw new UserException('We we\'re unable to locate the report list. Please try again.');
+    }
+
     array.forEach(function (element, index) {
-        var setValue = selector === '#account' ? index : element.id;
+        var setValue = isAccount ? index : element.id;
         var option = $('<option>')
             .attr('value', setValue)
             .text(element.name);
@@ -17,6 +30,34 @@ function appendOptionsToSelect(array, selector) {
 }
 
 var audit = {
+    flag: false,
+    spinner: $('.spinner'),
+    form: $('.sidebar'),
+
+    init: function () {
+        this.showAccounts(accounts);
+        this.showReports(reports);
+
+        $('#submit').on('click', $.proxy(audit.submit, audit));
+        $('#close').on('click', $.proxy(audit.close, audit));
+    },
+
+    showAccounts: function (accounts) {
+        try {
+            appendOptionsToSelect(accounts, '#account');
+        } catch (error) {
+            this.error(error);
+        }
+    },
+
+    showReports: function (reports) {
+        try {
+            appendOptionsToSelect(reports, '#report');
+        } catch (error) {
+            this.error(error);
+        }
+    },
+
     submit: function (e) {
         var data = JSON.stringify({
             ids: accounts[$('#account').val()],
@@ -25,63 +66,49 @@ var audit = {
 
         e.preventDefault();
 
+        this.form.hide();
+        this.spinner.show();
+
         google.script.run
-            .withSuccessHandler(this.close)
-            .withFailureHandler(this.showError)
+            .withSuccessHandler(this.success.bind(this))
+            .withFailureHandler(this.error.bind(this))
             .saveReportDataFromSidebar(data);
+    },
+
+    success: function () {
+        this.close();
+    },
+
+    error: function (error) {
+
+        if (error.message === 'Quota Error: User Rate Limit Exceeded.') {
+            this.errorHandleUserRateLimit();
+        }
+
+        this.close();
+        console.log(error);
+        window.alert(error);
+    },
+
+    errorHandleUserRateLimit: function () {
+        if (!this.flag) {
+            this.flag = true;
+            window.alert('It looks like you\'ve you hit the user rate limit. ' +
+                'We\'ll continue to ask for the data, but feel free to cancel ' +
+                'the request and try again later.');
+        }
+        return setTimeout(function () {
+            $('#submit').trigger('click');
+        }, 1000);
     },
 
     close: function () {
         google.script.host.close();
-    },
-
-    showError: function (error) {
-        console.log(error);
-        if (error && error.message && error.message === 'Quota Error: User Rate Limit Exceeded.') {
-            if (!flag) {
-                flag = true;
-                window.alert('It looks like you\'ve you hit the user rate limit. ' + 
-                    'We\'ll continue to ask for the data, but feel free to cancel ' + 
-                    'the request and try again later.');
-            }
-            return setTimeout(function () {
-                $('#submit').trigger('click');
-            }, 1000);
-        }
-
-        console.log(error);
-        window.alert('An error has occured, please try again.');
-        this.close();
-
-    },
-
-    init: function () {
-
-        this.showAccounts(accounts);
-
-        this.showReports(reports);
-
-    },
-
-    showAccounts: function (accounts) {
-        appendOptionsToSelect(accounts, '#account');
-    },
-
-    showReports: function (reports) {
-        appendOptionsToSelect(reports, '#report');
     }
 };
 
 $(function () {
-
-    // load Google Analytics accounts
+    // onReady - initialized
     audit.init();
-
-    // form - submit
-    $('#submit').on('click', $.proxy(audit.submit, audit));
-
-    // form - close
-    $('#close').on('click', $.proxy(audit.close, audit));
-
 });
 </script>
