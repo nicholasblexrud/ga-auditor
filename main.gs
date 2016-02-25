@@ -16,11 +16,6 @@ var colors = {
     red: '#e06666'
 };
 
-function UserException(message) {
-    this.messsage = message;
-    this.name = 'UserException';
-}
-
 function headerValuesAndColors(array) {
     return {
         values: [array.map(function (element) { return element.name; })],
@@ -695,8 +690,12 @@ function onOpen(e) {
     return SpreadsheetApp
         .getUi()
         .createAddonMenu()
-        .addItem('Create Report', 'showSidebar')
+        .addItem('Create report', 'showSidebar')
         .addToUi();
+}
+
+function onInstall(e) {
+    onOpen(e);
 }
 
 function showSidebar() {
@@ -729,10 +728,10 @@ function generateReport(account, reportName) {
     report
         .init({ account: account })
         .getData(function (data) {
-            var data1 = [[]];
 
-            if (!data1[0].length) {
-                throw new Error('No data for ' + reportName + ' found in the ' + account.name + ' account. Please try another account or report.');
+            // check if there is any data to be returned
+            if (data[0] === undefined || !data[0].length) {
+                throw new Error('No data found for ' + reportName + ' in ' + account.name + '. Please try another account or report.');
             }
 
             sheet.init({

@@ -82,11 +82,10 @@ var audit = {
     error: function (error) {
 
         if (error.message === 'Quota Error: User Rate Limit Exceeded.') {
-            this.errorHandleUserRateLimit();
+            return this.errorHandleUserRateLimit();
         }
 
         this.close();
-        console.log(error);
         window.alert(error);
     },
 

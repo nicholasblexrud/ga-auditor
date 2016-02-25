@@ -1,10 +1,12 @@
-# google-analytics-auditor
-This will become a public Add-on for Google Spreadsheets. It is a Google Apps Script (GAS) that connects to the [Google Analytics Management API](https://developers.google.com/analytics/devguides/config/mgmt/v3/) and pulls down information related to Goals, Filters, and View settings.
+# GA Auditor
+The GA Auditor spreadsheet add-on brings you the power of the Google Analytics Management API combined with the power of data manipulation in Google Spreadsheets. With this tool, you can create custom reports for:
+- Filters
+- Goals
+- View settings
 
 **BUGS**
- - select an account with no filters in it - cannot find length of undefined
- - issue when getting user limit - it doesn't continue submitting form and exits out
  - check for isBlank() could be checking too many rows and thus is slow - refactor to just check for a single row or cell
+ - add a counter for repeated calls when 'User Limit Exceeded' happens - timeout after 10 tries
 
 **Feature Requests**
  - add additional reports
@@ -15,9 +17,7 @@ This will become a public Add-on for Google Spreadsheets. It is a Google Apps Sc
 **Prior to launch**
  - document code (JSDoc)
  - review [UI Style Guide for Add-ons](https://developers.google.com/apps-script/add-ons/style)
- - add onInstall dialog
  - add GA tracking
-
 
 **Add to docs**
  - add all 20 goal steps?
